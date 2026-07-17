@@ -37,14 +37,20 @@ git push origin main
 In your Vercel project dashboard:
 
 1. Go to **Settings** → **Environment Variables**
-2. Add the following variables:
+2. Click **Add New**
+3. Add the following variables **one by one**:
 
-```
-PUBLIC_SUPABASE_URL=https://dhbgrxahiqnglxwtejqb.supabase.co
-PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoYmdyeGFoaXFuZ2x4d3RlanFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMTE0MDcsImV4cCI6MjA5OTg4NzQwN30.npGCyD9xXgoPJDziiBhOf90J3Jyh5-wusKfHyDWnhhg
-```
+**First variable:**
+- **Name**: `PUBLIC_SUPABASE_URL`
+- **Value**: `https://dhbgrxahiqnglxwtejqb.supabase.co`
+- Click **Save**
 
-3. Click **Save**
+**Second variable:**
+- **Name**: `PUBLIC_SUPABASE_ANON_KEY`
+- **Value**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoYmdyeGFoaXFuZ2x4d3RlanFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMTE0MDcsImV4cCI6MjA5OTg4NzQwN30.npGCyD9xXgoPJDziiBhOf90J3Jyh5-wusKfHyDWnhhg`
+- Click **Save**
+
+**Important**: Add these as plain environment variables, NOT as secrets. The `vercel.json` file has been updated to not reference secrets.
 
 ### 4. Deploy
 
