@@ -26,11 +26,7 @@ git push origin main
 1. **Go to [vercel.com](https://vercel.com)**
 2. **Click "Add New" → "Project"**
 3. **Import your GitHub repository**
-4. **Configure Project Settings:**
-   - **Framework Preset**: SvelteKit
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `.svelte-kit/output`
-   - **Install Command**: `npm install`
+4. **Vercel will auto-detect SvelteKit** and configure the build settings automatically
 
 ### 3. Configure Environment Variables in Vercel
 
@@ -50,7 +46,7 @@ In your Vercel project dashboard:
 - **Value**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRoYmdyeGFoaXFuZ2x4d3RlanFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMTE0MDcsImV4cCI6MjA5OTg4NzQwN30.npGCyD9xXgoPJDziiBhOf90J3Jyh5-wusKfHyDWnhhg`
 - Click **Save**
 
-**Important**: Add these as plain environment variables, NOT as secrets. The `vercel.json` file has been updated to not reference secrets.
+**Important**: Add these as plain environment variables, NOT as secrets. Vercel will auto-detect the SvelteKit project configuration.
 
 ### 4. Deploy
 
