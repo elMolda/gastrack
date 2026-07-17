@@ -45,6 +45,9 @@
 					console.error('Error creating user profile:', profileError);
 				}
 
+				// Wait a moment for session to be established
+				await new Promise(resolve => setTimeout(resolve, 500));
+				
 				// Redirect to car setup (mandatory after registration)
 				goto('/auth/car-setup');
 			}
@@ -61,10 +64,11 @@
 	<div class="space-y-6">
 		<h1 class="text-2xl font-bold text-dark">Create Account</h1>
 
-		<form on:submit={handleRegister} class="space-y-4">
+		<form onsubmit={handleRegister} class="space-y-4">
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Username</label>
+				<label for="username" class="text-xs font-bold text-slate-500 uppercase ml-1">Username</label>
 				<input 
+					id="username"
 					type="text" 
 					placeholder="Driver123" 
 					bind:value={username}
@@ -74,8 +78,9 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
 				<input 
+					id="email"
 					type="email" 
 					placeholder="name@example.com" 
 					bind:value={email}
@@ -85,8 +90,9 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
 				<input 
+					id="password"
 					type="password" 
 					placeholder="••••••••" 
 					bind:value={password}

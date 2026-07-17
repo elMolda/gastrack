@@ -1,19 +1,47 @@
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient, createServerClient } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import type { Database } from './schema';
+import type { RequestEvent } from '@sveltejs/kit';
 
-// Create a single supabase client for interacting with your database
-export const supabase = createClient<Database>(
+// Create a browser-side supabase client
+export const supabase = createBrowserClient<Database>(
 	PUBLIC_SUPABASE_URL,
-	PUBLIC_SUPABASE_ANON_KEY,
-	{
-		auth: {
-			persistSession: true,
-			autoRefreshToken: true,
-			detectSessionInUrl: true
-		}
-	}
+	PUBLIC_SUPABASE_ANON_KEY
 );
+
+// Create a server-side supabase client (for hooks.server.ts)
+export function createServerSupabase(event: RequestEvent) {
+	return createServerClient<Database>(
+		PUBLIC_SUPABASE_URL,
+		PUBLIC_SUPABASE_ANON_KEY,
+		{
+			cookies: {
+				get: (key) => event.cookies.get(key),
+				set: (key, value, options) => {
+					event.cookies.set(key, value, { ...options, path: '/' });
+				},
+				remove: (key, options) => {
+					event.cookies.delete(key, { ...options, path: '/' });
+				}
+			}
+		}
+	);
+}
+
+// Create a server-side supabase client using cookies directly (for +page.server.ts)
+export function createServerSupabaseFromCookies(cookies: { get: (key: string) => string | undefined }) {
+	return createServerClient<Database>(
+		PUBLIC_SUPABASE_URL,
+		PUBLIC_SUPABASE_ANON_KEY,
+		{
+			cookies: {
+				get: (key) => cookies.get(key),
+				set: () => {}, // Read-only in load functions
+				remove: () => {}
+			}
+		}
+	);
+}
 
 // Helper to get the current user session
 export async function getSession() {

@@ -1,14 +1,17 @@
-import { supabase } from '$lib/db/client';
+import { createServerSupabaseFromCookies } from '$lib/db/client';
 import { calculateDashboardStats } from '$lib/types';
 import type { FuelLog } from '$lib/types';
 import { error, redirect } from '@sveltejs/kit';
 
-export async function load({ locals }) {
+export async function load({ locals, cookies }: any) {
 	// Check if user is authenticated
 	const session = locals.session;
 	if (!session) {
 		throw redirect(303, '/auth/login');
 	}
+
+	// Create a server-side Supabase client from cookies
+	const supabase = createServerSupabaseFromCookies(cookies);
 
 	try {
 		// Get user's fuel logs from database

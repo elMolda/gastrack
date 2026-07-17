@@ -99,11 +99,11 @@
 	<!-- Header -->
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300">
+			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('logs.newFillUp')}</h1>
-			<button on:click={handleSave} class="text-white font-semibold tracking-wide hover:text-primary/80 transition">{t('logs.save')}</button>
+			<button onclick={handleSave} class="text-white font-semibold tracking-wide hover:text-primary/80 transition">{t('logs.save')}</button>
 		</div>
 		
 		<!-- Preview Cards -->
@@ -130,15 +130,16 @@
 	</div>
 
 	<!-- Form -->
-	<form on:submit={handleSave} class="p-6 space-y-5">
+	<form onsubmit={handleSave} class="p-6 space-y-5">
 		<!-- Date -->
 		<div class="space-y-1.5">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.fillUpDate')}</label>
+			<label for="fillUpDate" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.fillUpDate')}</label>
 			<div class="relative">
 				<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
 					<i class="far fa-calendar-alt"></i>
 				</div>
 				<input 
+					id="fillUpDate"
 					type="date" 
 					bind:value={date}
 					class="w-full bg-white border border-slate-200 text-slate-900 rounded-xl p-3.5 pl-12 focus:ring-2 focus:ring-primary outline-none transition shadow-sm font-medium"
@@ -149,9 +150,10 @@
 		<!-- Distance & Fuel -->
 		<div class="grid grid-cols-2 gap-4">
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.distanceCovered')}</label>
+				<label for="distance" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.distanceCovered')}</label>
 				<div class="relative flex items-center bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
 					<input 
+						id="distance"
 						type="number" 
 						required 
 						placeholder="0" 
@@ -169,9 +171,10 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.fuelAdded')}</label>
+				<label for="fuel" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.fuelAdded')}</label>
 				<div class="relative flex items-center bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
 					<input 
+						id="fuel"
 						type="number" 
 						required 
 						step="any" 
@@ -192,10 +195,11 @@
 
 		<!-- Price -->
 		<div class="space-y-1.5">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.pricePerUnit', { unit: t(`units.${fuelUnit}`) })}</label>
+			<label for="price" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.pricePerUnit', { unit: t(`units.${fuelUnit}`) })}</label>
 			<div class="relative">
 				<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none font-bold text-slate-400">$</div>
 				<input 
+					id="price"
 					type="number" 
 					required 
 					step="any" 
@@ -208,7 +212,7 @@
 
 		<!-- Drive Conditions -->
 		<div class="space-y-2">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.driveConditions')}</label>
+			<label for="driveConditions" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('logs.driveConditions')}</label>
 			<div class="grid grid-cols-3 gap-3">
 				{#each [
 					{ id: 'city', icon: 'fa-city', label: t('dashboard.city') },
@@ -217,7 +221,7 @@
 				] as type}
 					<button
 						type="button" 
-						on:click={() => driveType = type.id as DriveType}
+						onclick={() => driveType = type.id as DriveType}
 						class={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition border ${
 							driveType === type.id ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white border-slate-200 text-slate-500'
 						}`}
@@ -233,7 +237,7 @@
 		<div class="pt-2">
 			<button 
 				type="button" 
-				on:click={() => showAdvanced = !showAdvanced}
+				onclick={() => showAdvanced = !showAdvanced}
 				class="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 text-slate-700 font-bold shadow-sm"
 			>
 				<span class="flex items-center gap-2 text-xs uppercase text-slate-500 tracking-wider">
@@ -245,10 +249,11 @@
 			
 			{#if showAdvanced}
 				<div class="mt-3 p-4 bg-white border border-slate-200 rounded-xl space-y-3">
-					<label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('logs.dashboardEfficiency')}</label>
+					<label for="carReported" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">{t('logs.dashboardEfficiency')}</label>
 					
 					<div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
 						<input 
+							id="carReported"
 							type="number" 
 							step="any" 
 							placeholder="e.g. 10.5" 

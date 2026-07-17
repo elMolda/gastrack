@@ -7,11 +7,13 @@
 	import HistoryLog from '$lib/components/dashboard/HistoryLog.svelte';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
 
-	export let data: {
-		logs: FuelLog[];
-		stats: DashboardStats;
-		cars: any[];
-	};
+	const { data } = $props<{
+		data: {
+			logs: FuelLog[];
+			stats: DashboardStats;
+			cars: any[];
+		};
+	}>();
 
 	// Real-time subscription for fuel log updates
 	let realTimeLogs = $state(data.logs);

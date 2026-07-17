@@ -25,6 +25,9 @@
 			}
 
 			if (data.user) {
+				// Wait a moment for session to be established
+				await new Promise(resolve => setTimeout(resolve, 500));
+
 				// Check if user has any cars
 				const { data: cars, error: carsError } = await supabase
 					.from('cars')
@@ -59,10 +62,11 @@
 			<p class="text-slate-400 text-sm">Sign in to your fuel analytics</p>
 		</div>
 
-		<form on:submit={handleLogin} class="space-y-4">
+		<form onsubmit={handleLogin} class="space-y-4">
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
 				<input 
+					id="email"
 					type="email" 
 					placeholder="name@example.com" 
 					bind:value={email}
@@ -72,8 +76,9 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
 				<input 
+					id="password"
 					type="password" 
 					placeholder="••••••••" 
 					bind:value={password}

@@ -22,20 +22,21 @@
 	<!-- Header -->
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<button on:click={() => window.history.back()} class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300">
+			<button onclick={() => window.history.back()} class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
 				<i class="fas fa-chevron-left"></i>
 			</button>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('cars.addCar')}</h1>
-			<button on:click={handleSubmit} class="text-white font-semibold tracking-wide hover:text-primary/80 transition">{t('cars.finishSetup')}</button>
+			<button onclick={handleSubmit} class="text-white font-semibold tracking-wide hover:text-primary/80 transition">{t('cars.finishSetup')}</button>
 		</div>
 	</div>
 
 	<!-- Form -->
-	<form on:submit={handleSubmit} class="p-6 space-y-6">
+	<form onsubmit={handleSubmit} class="p-6 space-y-6">
 		<div class="grid grid-cols-2 gap-4">
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.brand')}</label>
+				<label for="carBrand" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.brand')}</label>
 				<input 
+					id="carBrand"
 					type="text" 
 					placeholder="e.g. VW" 
 					bind:value={brand}
@@ -44,8 +45,9 @@
 				/>
 			</div>
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.model')}</label>
+				<label for="carModel" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.model')}</label>
 				<input 
+					id="carModel"
 					type="text" 
 					placeholder="e.g. Voyage" 
 					bind:value={model}
@@ -56,8 +58,9 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.year')}</label>
+			<label for="carYear" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.year')}</label>
 			<input 
+				id="carYear"
 				type="number" 
 				placeholder="2019" 
 				bind:value={year}
@@ -67,8 +70,9 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.licensePlate')}</label>
+			<label for="carLicensePlate" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.licensePlate')}</label>
 			<input 
+				id="carLicensePlate"
 				type="text" 
 				placeholder="ABC-123" 
 				bind:value={licensePlate}
@@ -77,8 +81,8 @@
 		</div>
 
 		<div class="space-y-1.5">
-			<label class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.carPicture')}</label>
-			<div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
+			<label for="carPicture" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.carPicture')}</label>
+			<div id="carPicture" class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
 				<i class="fas fa-camera text-2xl mb-2"></i>
 				<p class="text-xs">{t('cars.uploadImage')}</p>
 			</div>

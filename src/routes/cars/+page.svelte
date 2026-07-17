@@ -16,7 +16,7 @@
 	<!-- Header -->
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300">
+			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('cars.manageCars')}</h1>
@@ -51,7 +51,7 @@
 								{/if}
 							</div>
 						</div>
-						<button class="text-slate-400 hover:text-slate-600">
+						<button class="text-slate-400 hover:text-slate-600" aria-label="More options">
 							<i class="fas fa-ellipsis-v"></i>
 						</button>
 					</div>

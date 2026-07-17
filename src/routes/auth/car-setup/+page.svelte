@@ -2,6 +2,7 @@
 	import { t } from '$lib/i18n';
 	import { supabase } from '$lib/db/client';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	let brand = $state('');
 	let model = $state('');
@@ -10,6 +11,19 @@
 	let isDefault = $state(true);
 	let loading = $state(false);
 	let error = $state('');
+	let checkingAuth = $state(true);
+
+	onMount(async () => {
+		// Check authentication when component mounts
+		const { data: { user }, error: userError } = await supabase.auth.getUser();
+		
+		if (userError || !user) {
+			// If not authenticated, redirect to login
+			goto('/auth/login');
+		} else {
+			checkingAuth = false;
+		}
+	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -21,7 +35,8 @@
 			const { data: { user }, error: userError } = await supabase.auth.getUser();
 			
 			if (userError || !user) {
-				error = 'User not authenticated';
+				error = 'User not authenticated. Please try again.';
+				loading = false;
 				return;
 			}
 
@@ -56,14 +71,21 @@
 </script>
 
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl p-6 flex flex-col justify-center">
-	<div class="space-y-6">
-		<h1 class="text-2xl font-bold text-dark">Add Your Vehicle</h1>
+	{#if checkingAuth}
+		<div class="text-center py-12">
+			<div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+			<p class="text-slate-600">Checking authentication...</p>
+		</div>
+	{:else}
+		<div class="space-y-6">
+			<h1 class="text-2xl font-bold text-dark">Add Your Vehicle</h1>
 
-		<form on:submit={handleSubmit} class="space-y-4">
+		<form onsubmit={handleSubmit} class="space-y-4">
 			<div class="grid grid-cols-2 gap-4">
 				<div class="space-y-1.5">
-					<label class="text-xs font-bold text-slate-500 uppercase ml-1">Brand</label>
+					<label for="brand" class="text-xs font-bold text-slate-500 uppercase ml-1">Brand</label>
 					<input 
+						id="brand"
 						type="text" 
 						placeholder="e.g. VW" 
 						bind:value={brand}
@@ -72,8 +94,9 @@
 					/>
 				</div>
 				<div class="space-y-1.5">
-					<label class="text-xs font-bold text-slate-500 uppercase ml-1">Model</label>
+					<label for="model" class="text-xs font-bold text-slate-500 uppercase ml-1">Model</label>
 					<input 
+						id="model"
 						type="text" 
 						placeholder="e.g. Voyage" 
 						bind:value={model}
@@ -84,8 +107,9 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Year</label>
+				<label for="year" class="text-xs font-bold text-slate-500 uppercase ml-1">Year</label>
 				<input 
+					id="year"
 					type="number" 
 					placeholder="2019" 
 					bind:value={year}
@@ -95,8 +119,9 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">License Plate (Optional)</label>
+				<label for="licensePlate" class="text-xs font-bold text-slate-500 uppercase ml-1">License Plate (Optional)</label>
 				<input 
+					id="licensePlate"
 					type="text" 
 					placeholder="ABC-123" 
 					bind:value={licensePlate}
@@ -105,8 +130,8 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label class="text-xs font-bold text-slate-500 uppercase ml-1">Car Picture (Optional)</label>
-				<div class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
+				<label for="carPicture" class="text-xs font-bold text-slate-500 uppercase ml-1">Car Picture (Optional)</label>
+				<div id="carPicture" class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
 					<i class="fas fa-camera text-2xl mb-2"></i>
 					<p class="text-xs">Upload Image</p>
 				</div>
@@ -141,5 +166,6 @@
 				{/if}
 			</button>
 		</form>
-	</div>
+		</div>
+	{/if}
 </div>

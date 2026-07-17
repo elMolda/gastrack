@@ -1,4 +1,4 @@
-import { supabase } from '$lib/db/client';
+import { createServerSupabase } from '$lib/db/client';
 import { redirect, type Handle } from '@sveltejs/kit';
 
 // Public routes that don't require authentication
@@ -9,6 +9,9 @@ const publicRoutes = [
 ];
 
 export const handle: Handle = async ({ event, resolve }) => {
+	// Create a server-side Supabase client using the request cookies
+	const supabase = createServerSupabase(event);
+	
 	// Get session from Supabase
 	const { data: { session } } = await supabase.auth.getSession();
 	event.locals.session = session;
