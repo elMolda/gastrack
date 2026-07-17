@@ -156,6 +156,7 @@
 						id="distance"
 						type="number" 
 						required 
+						step="any"
 						placeholder="0" 
 						bind:value={distance}
 						class="w-full bg-transparent p-3.5 outline-none font-semibold text-slate-900"
