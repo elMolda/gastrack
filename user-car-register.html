@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FuelTracker - Auth & Setup</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = { theme: { extend: { colors: { primary: '#0ea5e9', dark: '#0f172a' }}}}
+    </script>
+</head>
+<body class="bg-slate-50 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+            const [view, setView] = useState('login'); // login, register, carSetup, dashboard
+            
+            // Reusable Input Component
+            const Input = ({ label, type, placeholder }) => (
+                <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">{label}</label>
+                    <input type={type} placeholder={placeholder} 
+                           className="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" />
+                </div>
+            );
+
+            return (
+                <div className="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl p-6 flex flex-col justify-center">
+                    
+                    {/* --- LOGIN SCREEN --- */}
+                    {view === 'login' && (
+                        <div className="space-y-6">
+                            <div className="text-center mb-8">
+                                <h1 className="text-3xl font-bold text-dark">Welcome Back</h1>
+                                <p className="text-slate-400 text-sm">Sign in to your fuel analytics</p>
+                            </div>
+                            <Input label="Email" type="email" placeholder="name@example.com" />
+                            <Input label="Password" type="password" placeholder="••••••••" />
+                            <button onClick={() => setView('dashboard')} className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-sky-600 transition">Sign In</button>
+                            <p className="text-center text-xs text-slate-500">Don't have an account? 
+                                <button onClick={() => setView('register')} className="text-primary font-bold ml-1">Register</button>
+                            </p>
+                        </div>
+                    )}
+
+                    {/* --- REGISTER SCREEN --- */}
+                    {view === 'register' && (
+                        <div className="space-y-6">
+                            <h1 className="text-2xl font-bold text-dark">Create Account</h1>
+                            <Input label="Username" type="text" placeholder="Driver123" />
+                            <Input label="Email" type="email" placeholder="name@example.com" />
+                            <Input label="Password" type="password" placeholder="••••••••" />
+                            <button onClick={() => setView('carSetup')} className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-sky-600 transition">Continue</button>
+                        </div>
+                    )}
+
+                    {/* --- CAR SETUP SCREEN --- */}
+                    {view === 'carSetup' && (
+                        <div className="space-y-6">
+                            <h1 className="text-2xl font-bold text-dark">Add Your Vehicle</h1>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input label="Brand" type="text" placeholder="e.g. VW" />
+                                <Input label="Model" type="text" placeholder="e.g. Voyage" />
+                            </div>
+                            <Input label="Year" type="number" placeholder="2019" />
+                            <Input label="License Plate (Optional)" type="text" placeholder="ABC-123" />
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-500 uppercase ml-1">Car Picture (Optional)</label>
+                                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
+                                    <i className="fas fa-camera text-2xl mb-2"></i>
+                                    <p className="text-xs">Upload Image</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setView('dashboard')} className="w-full bg-dark text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition">Finish Setup</button>
+                        </div>
+                    )}
+
+                    {/* --- DASHBOARD (Placeholder) --- */}
+                    {view === 'dashboard' && (
+                        <div className="text-center space-y-4">
+                            <h1 className="text-2xl font-bold">Dashboard Ready</h1>
+                            <button onClick={() => setView('login')} className="text-primary text-sm font-bold">Logout</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

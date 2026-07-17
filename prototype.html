@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas Tracker - Fully Decoupled Metrics</title>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for in-browser JSX compilation -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0ea5e9',
+                        dark: '#0f172a',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        select { -webkit-appearance: none; appearance: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Seed data reflecting a real-world scenario: tracking trip distance in km, pump in gallons, but dashboard in km/L
+        const initialLogs = [
+            { id: 1, date: '2026-07-12', distance: 355, distUnit: 'km', fuel: 9.1, fuelUnit: 'gal', price: 3.52, driveType: 'city', carReported: 10.5, carReportedUnit: 'km/L' },
+            { id: 2, date: '2026-07-04', distance: 442, distUnit: 'km', fuel: 10.2, fuelUnit: 'gal', price: 3.48, driveType: 'highway', carReported: 11.8, carReportedUnit: 'km/L' },
+            { id: 3, date: '2026-06-25', distance: 385, distUnit: 'km', fuel: 9.6, fuelUnit: 'gal', price: 3.55, driveType: 'mixed', carReported: 10.9, carReportedUnit: 'km/L' },
+            { id: 4, date: '2026-06-14', distance: 330, distUnit: 'km', fuel: 9.0, fuelUnit: 'gal', price: 3.61, driveType: 'city', carReported: 9.8, carReportedUnit: 'km/L' },
+            { id: 5, date: '2026-05-29', distance: 460, distUnit: 'km', fuel: 10.4, fuelUnit: 'gal', price: 3.45, driveType: 'highway', carReported: 12.1, carReportedUnit: 'km/L' }
+        ];
+
+        // Global unit conversion helper to normalize metrics seamlessly for cross-comparisons (normalized to km/gal)
+        const toKmPerGal = (value, unit) => {
+            if (!value || isNaN(value)) return 0;
+            const val = parseFloat(value);
+            switch(unit) {
+                case 'km/gal': return val;
+                case 'km/L': return val * 3.78541; // 1 gallon = 3.78541 Liters
+                case 'MPG': return val * 1.60934;   // 1 mile = 1.60934 km
+                case 'L/100km': return val > 0 ? 378.541 / val : 0; 
+                default: return val;
+            }
+        };
+
+        function App() {
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [logs, setLogs] = useState(initialLogs);
+            
+            // New Log Form State
+            const today = new Date().toISOString().split('T')[0];
+            const [date, setDate] = useState(today);
+            const [distance, setDistance] = useState('');
+            const [distUnit, setDistUnit] = useState('km');
+            const [fuel, setFuel] = useState('');
+            const [fuelUnit, setFuelUnit] = useState('gal');
+            const [price, setPrice] = useState('');
+            const [driveType, setDriveType] = useState('mixed');
+            const [showAdvanced, setShowAdvanced] = useState(false);
+            const [carReported, setCarReported] = useState('');
+            const [carReportedUnit, setCarReportedUnit] = useState('km/L'); // Default set to km/L layout
+
+            // --- AGGREGATE CALCULATIONS ---
+            const totalKm = logs.reduce((acc, log) => acc + parseFloat(log.distance), 0);
+            const totalGal = logs.reduce((acc, log) => acc + parseFloat(log.fuel), 0);
+            const avgEfficiency = (totalKm / totalGal).toFixed(1); 
+            const totalSpent = logs.reduce((acc, log) => acc + (parseFloat(log.fuel) * parseFloat(log.price)), 0);
+            const avgCostPerKm = (totalSpent / totalKm).toFixed(2);
+
+            const getDriveTypeStats = (type) => {
+                const filtered = logs.filter(l => l.driveType === type);
+                if (!filtered.length) return 0;
+                const dist = filtered.reduce((acc, l) => acc + parseFloat(l.distance), 0);
+                const fl = filtered.reduce((acc, l) => acc + parseFloat(l.fuel), 0);
+                return (dist / fl).toFixed(1);
+            };
+
+            // Cross-unit discrepancy calculation
+            const reportedLogs = logs.filter(l => l.carReported);
+            const totalNormalizedReported = reportedLogs.reduce((acc, l) => acc + toKmPerGal(l.carReported, l.carReportedUnit), 0);
+            const avgReportedKmPerGal = reportedLogs.length ? (totalNormalizedReported / reportedLogs.length) : 0;
+            const calculationDeviation = avgReportedKmPerGal > 0 
+                ? (((parseFloat(avgEfficiency) - avgReportedKmPerGal) / avgReportedKmPerGal) * 100).toFixed(1)
+                : '0.0';
+
+            // Form Submit Handler
+            const handleSave = (e) => {
+                e.preventDefault();
+                if (!distance || !fuel || !price) return;
+
+                const newEntry = {
+                    id: Date.now(),
+                    date,
+                    distance: parseFloat(distance),
+                    distUnit,
+                    fuel: parseFloat(fuel),
+                    fuelUnit,
+                    price: parseFloat(price),
+                    driveType,
+                    carReported: carReported ? parseFloat(carReported) : null,
+                    carReportedUnit: carReported ? carReportedUnit : null
+                };
+
+                setLogs([newEntry, ...logs]);
+                
+                // Form cleanup
+                setDistance('');
+                setFuel('');
+                setPrice('');
+                setCarReported('');
+                setActiveTab('dashboard');
+            };
+
+            // Live form preview metrics
+            const livePumpEfficiency = distance && fuel && parseFloat(fuel) > 0 ? (parseFloat(distance) / parseFloat(fuel)) : 0;
+            const liveCarEfficiencyInKmGal = carReported ? toKmPerGal(carReported, carReportedUnit) : 0;
+            const liveDeviation = liveCarEfficiencyInKmGal > 0 
+                ? (((livePumpEfficiency - liveCarEfficiencyInKmGal) / liveCarEfficiencyInKmGal) * 100).toFixed(1) 
+                : '0.0';
+
+            return (
+                <div className="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
+                    
+                    {/* ================= DASHBOARD TAB ================= */}
+                    {activeTab === 'dashboard' && (
+                        <div>
+                            <div className="bg-dark text-white px-5 pt-10 pb-20 rounded-b-[2.5rem] shadow-lg">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Welcome Back</p>
+                                        <h1 className="text-2xl font-bold tracking-tight">Fuel Analytics</h1>
+                                    </div>
+                                    <button className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300">
+                                        <i className="fas fa-sliders-h"></i>
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div className="bg-slate-800/90 rounded-2xl p-4 border border-slate-700/40 backdrop-blur-sm">
+                                        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Avg Efficiency</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-extrabold text-primary">{avgEfficiency}</span>
+                                            <span className="text-xs font-medium text-slate-400">km/gal</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-slate-800/90 rounded-2xl p-4 border border-slate-700/40 backdrop-blur-sm">
+                                        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Cost / km</p>
+                                        <div className="flex items-baseline gap-0.5">
+                                            <span className="text-xs font-semibold text-slate-400">$</span>
+                                            <span className="text-3xl font-extrabold text-white">{avgCostPerKm}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="px-5 -mt-12 space-y-5">
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Spent</p>
+                                        <p className="text-sm font-bold text-slate-800 mt-1">${totalSpent.toLocaleString('en-US', {maximumFractionDigits:0})}</p>
+                                    </div>
+                                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Distance</p>
+                                        <p className="text-sm font-bold text-slate-800 mt-1">{totalKm} km</p>
+                                    </div>
+                                    <div className="bg-white rounded-xl p-3 shadow-sm border border-slate-100 text-center">
+                                        <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Fuel</p>
+                                        <p className="text-sm font-bold text-slate-800 mt-1">{totalGal.toFixed(1)} gal</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                                    <h3 className="text-sm font-bold text-slate-700 mb-4">Efficiency Trend (km/gal)</h3>
+                                    <div className="h-28 w-full flex items-end justify-between px-2 pt-2 relative">
+                                        {logs.slice(0, 5).reverse().map((log, index) => {
+                                            const efficiencyVal = (log.distance / log.fuel);
+                                            const heightPercent = Math.min((efficiencyVal / 55) * 100, 100);
+                                            return (
+                                                <div key={index} className="flex flex-col items-center flex-1 group">
+                                                    <div className="w-7 bg-slate-100 rounded-t-md relative flex items-end h-20 transition-all duration-300 hover:bg-primary/20">
+                                                        <div 
+                                                            style={{ height: `${heightPercent}%` }} 
+                                                            className={`w-full rounded-t-md transition-all duration-500 ${
+                                                                log.driveType === 'highway' ? 'bg-sky-400' : log.driveType === 'city' ? 'bg-amber-400' : 'bg-emerald-400'
+                                                            }`}
+                                                        ></div>
+                                                        <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-[10px] font-bold text-slate-700 opacity-90">
+                                                            {efficiencyVal.toFixed(0)}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[9px] text-slate-400 font-medium mt-1.5">
+                                                        {log.date.split('-')[2]}/{log.date.split('-')[1]}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="flex justify-center gap-4 mt-3 pt-3 border-t border-slate-50 text-[10px] font-semibold text-slate-500">
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400"></span> City</span>
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400"></span> Mixed</span>
+                                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-400"></span> Highway</span>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+                                    <h3 className="text-sm font-bold text-slate-700">Performance by Condition</h3>
+                                    <div className="space-y-2.5">
+                                        {[
+                                            { id: 'highway', label: 'Highway Performance', color: 'bg-sky-400', val: getDriveTypeStats('highway') },
+                                            { id: 'mixed', label: 'Mixed Performance', color: 'bg-emerald-400', val: getDriveTypeStats('mixed') },
+                                            { id: 'city', label: 'City Traffic Performance', color: 'bg-amber-400', val: getDriveTypeStats('city') },
+                                        ].map((item) => (
+                                            <div key={item.id} className="space-y-1">
+                                                <div className="flex justify-between text-xs font-semibold text-slate-600">
+                                                    <span>{item.label}</span>
+                                                    <span className="text-slate-900 font-bold">{item.val} km/gal</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                                    <div style={{ width: `${Math.min((item.val / 55) * 100, 100)}%` }} className={`h-full ${item.color} rounded-full`}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Computer Accuracy Analysis Card */}
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between">
+                                    <div className="space-y-0.5 max-w-[65%]">
+                                        <h3 className="text-sm font-bold text-slate-700">On-Board Computer Accuracy</h3>
+                                        <p className="text-xs text-slate-400 font-medium">Cross-comparing converted dashboard entries vs. real pump logic</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${
+                                            parseFloat(calculationDeviation) < 0 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+                                        }`}>
+                                            {calculationDeviation}% {parseFloat(calculationDeviation) < 0 ? 'Optimistic' : 'Pessimistic'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex justify-between items-center px-1">
+                                        <h3 className="text-sm font-bold text-slate-700">History Log</h3>
+                                        <span className="text-xs font-semibold text-primary">View All</span>
+                                    </div>
+                                    
+                                    <div className="space-y-2.5">
+                                        {logs.map((log) => (
+                                            <div key={log.id} className="bg-white rounded-xl p-3.5 shadow-sm border border-slate-100 flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs ${
+                                                        log.driveType === 'highway' ? 'bg-sky-50 text-sky-500' : log.driveType === 'city' ? 'bg-amber-50 text-amber-500' : 'bg-emerald-50 text-emerald-500'
+                                                    }`}>
+                                                        <i className={`fas ${log.driveType === 'highway' ? 'fa-road' : log.driveType === 'city' ? 'fa-city' : 'fa-random'}`}></i>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs font-bold text-slate-800">Filled {log.distance} {log.distUnit}</p>
+                                                        <p className="text-[10px] text-slate-400 font-medium">Dashboard read: {log.carReported ? `${log.carReported} ${log.carReportedUnit}` : 'N/A'}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-xs font-extrabold text-slate-800">{(log.distance / log.fuel).toFixed(1)} km/gal</p>
+                                                    <p className="text-[10px] text-slate-400 font-medium">${(log.fuel * log.price).toFixed(2)} total</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ================= NEW LOG TAB ================= */}
+                    {activeTab === 'new-log' && (
+                        <div>
+                            <div className="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
+                                <div className="flex justify-between items-center mb-6">
+                                    <button onClick={() => setActiveTab('dashboard')} className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300">
+                                        <i className="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h1 className="text-xl font-semibold tracking-wide">New Fill-Up</h1>
+                                    <button onClick={handleSave} className="text-primary font-semibold tracking-wide">Save</button>
+                                </div>
+                                
+                                <div className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/50 flex justify-between items-end backdrop-blur-sm">
+                                    <div>
+                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Efficiency Preview</p>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-bold text-white">
+                                                {livePumpEfficiency > 0 ? livePumpEfficiency.toFixed(2) : '0.00'}
+                                            </span>
+                                            <span className="text-sm font-medium text-slate-400">{distUnit}/{fuelUnit}</span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-1">Calculated Cost</p>
+                                        <div className="flex items-baseline gap-1 justify-end">
+                                            <span className="text-sm font-medium text-slate-400">$</span>
+                                            <span className="text-2xl font-bold text-white">
+                                                {fuel && price ? (parseFloat(fuel) * parseFloat(price)).toFixed(2) : '0.00'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSave} className="p-6 space-y-5">
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Fill-up Date</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                            <i className="far fa-calendar-alt"></i>
+                                        </div>
+                                        <input 
+                                            type="date" value={date} onChange={(e) => setDate(e.target.value)}
+                                            className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl p-3.5 pl-12 focus:ring-2 focus:ring-primary outline-none transition shadow-sm font-medium"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Distance Covered</label>
+                                        <div className="relative flex items-center bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
+                                            <input 
+                                                type="number" required placeholder="0" value={distance}
+                                                onChange={(e) => setDistance(e.target.value)}
+                                                className="w-full bg-transparent p-3.5 outline-none font-semibold text-slate-900"
+                                            />
+                                            <select 
+                                                value={distUnit} onChange={(e) => setDistUnit(e.target.value)}
+                                                className="bg-slate-50 h-full px-3 text-slate-500 font-bold text-xs outline-none cursor-pointer border-l border-slate-200"
+                                            >
+                                                <option value="km">km</option>
+                                                <option value="mi">mi</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Fuel Added</label>
+                                        <div className="relative flex items-center bg-white border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
+                                            <input 
+                                                type="number" required step="any" placeholder="0.0" value={fuel}
+                                                onChange={(e) => setFuel(e.target.value)}
+                                                className="w-full bg-transparent p-3.5 outline-none font-semibold text-slate-900"
+                                            />
+                                            <select 
+                                                value={fuelUnit} onChange={(e) => setFuelUnit(e.target.value)}
+                                                className="bg-slate-50 h-full px-3 text-slate-500 font-bold text-xs outline-none cursor-pointer border-l border-slate-200"
+                                            >
+                                                <option value="gal">gal</option>
+                                                <option value="L">L</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Price per {fuelUnit}</label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none font-bold text-slate-400">$</div>
+                                        <input 
+                                            type="number" required step="any" placeholder="0.00" value={price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                            className="w-full bg-white border border-slate-200 text-slate-900 rounded-xl p-3.5 pl-10 focus:ring-2 focus:ring-primary outline-none transition shadow-sm font-semibold"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Drive Conditions</label>
+                                    <div className="grid grid-cols-3 gap-3">
+                                        {[
+                                            { id: 'city', icon: 'fa-city', label: 'City' },
+                                            { id: 'mixed', icon: 'fa-random', label: 'Mixed' },
+                                            { id: 'highway', icon: 'fa-road', label: 'Highway' }
+                                        ].map(type => (
+                                            <button
+                                                type="button" key={type.id} onClick={() => setDriveType(type.id)}
+                                                className={`py-3 rounded-xl flex flex-col items-center justify-center gap-1.5 transition border ${
+                                                    driveType === type.id ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-white border-slate-200 text-slate-500'
+                                                }`}
+                                            >
+                                                <i className={`fas ${type.icon}`}></i>
+                                                <span className="text-[11px] font-bold">{type.label}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Fully Decoupled Dashboard Readout Section */}
+                                <div className="pt-2">
+                                    <button 
+                                        type="button" onClick={() => setShowAdvanced(!showAdvanced)}
+                                        className="w-full flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200 text-slate-700 font-bold shadow-sm"
+                                    >
+                                        <span className="flex items-center gap-2 text-xs uppercase text-slate-500 tracking-wider">
+                                            <i className="fas fa-car text-slate-400"></i>
+                                            Car Computer Readout
+                                        </span>
+                                        <i className={`fas fa-chevron-down text-sm transition-transform ${showAdvanced ? 'rotate-180' : ''}`}></i>
+                                    </button>
+                                    
+                                    {showAdvanced && (
+                                        <div className="mt-3 p-4 bg-white border border-slate-200 rounded-xl space-y-3">
+                                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Dashboard Efficiency & Independent Unit</label>
+                                            
+                                            <div className="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl focus-within:ring-2 focus-within:ring-primary transition shadow-sm overflow-hidden">
+                                                <input 
+                                                    type="number" step="any" placeholder="e.g. 10.5" value={carReported}
+                                                    onChange={(e) => setCarReported(e.target.value)}
+                                                    className="w-full bg-transparent p-3.5 outline-none font-semibold text-slate-900"
+                                                />
+                                                <select 
+                                                    value={carReportedUnit} onChange={(e) => setCarReportedUnit(e.target.value)}
+                                                    className="bg-slate-100 h-full px-3 text-slate-500 font-bold text-xs outline-none cursor-pointer border-l border-slate-200 py-3.5"
+                                                >
+                                                    <option value="km/L">km/L</option>
+                                                    <option value="km/gal">km/gal</option>
+                                                    <option value="MPG">MPG</option>
+                                                    <option value="L/100km">L/100km</option>
+                                                </select>
+                                            </div>
+
+                                            {carReported && livePumpEfficiency > 0 && (
+                                                <div className="text-xs text-slate-500 font-medium bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-start gap-2">
+                                                    <i className="fas fa-info-circle text-primary mt-0.5"></i>
+                                                    <div>
+                                                        <p>Normalized dashboard read: <strong className="text-slate-700">{liveCarEfficiencyInKmGal.toFixed(1)} km/gal</strong></p>
+                                                        <p className="mt-1">
+                                                            Your real pump math is <strong className={parseFloat(liveDeviation) >= 0 ? "text-emerald-600" : "text-amber-600"}>{Math.abs(liveDeviation)}% {parseFloat(liveDeviation) >= 0 ? 'better' : 'worse'}</strong> than what your car displays.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="pt-4">
+                                    <button type="submit" className="w-full bg-primary hover:bg-sky-600 text-white font-bold text-md py-4 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition">
+                                        Save Log Entry
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
+                    {/* Navigation Bar */}
+                    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/90 backdrop-blur-md border-t border-slate-200/60 px-8 py-3 flex justify-around items-center z-50 rounded-t-3xl shadow-2xl">
+                        <button 
+                            onClick={() => setActiveTab('dashboard')}
+                            className={`flex flex-col items-center gap-1 p-2 transition ${activeTab === 'dashboard' ? 'text-primary font-bold' : 'text-slate-400 font-medium'}`}
+                        >
+                            <i className="fas fa-chart-pie text-xl"></i>
+                            <span className="text-[10px]">Dashboard</span>
+                        </button>
+                        
+                        <button 
+                            onClick={() => setActiveTab('new-log')}
+                            className={`flex flex-col items-center gap-1 p-2 transition ${activeTab === 'new-log' ? 'text-primary font-bold' : 'text-slate-400 font-medium'}`}
+                        >
+                            <i className="fas fa-gas-pump text-xl"></i>
+                            <span className="text-[10px]">Add Log</span>
+                        </button>
+                    </div>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

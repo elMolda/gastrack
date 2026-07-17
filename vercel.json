@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/sveltekit"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
+  ],
+  "env": {
+    "PUBLIC_SUPABASE_URL": "@public_supabase_url",
+    "PUBLIC_SUPABASE_ANON_KEY": "@public_supabase_anon_key"
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".svelte-kit/output",
+  "installCommand": "npm install",
+  "framework": "sveltekit-1"
+}

@@ -1,0 +1,18 @@
+# SvelteKit Development & MCP Guidelines
+
+## MCP Tooling Usage
+- You have access to the Svelte MCP server.
+- ALWAYS use `list_sections` first to discover documentation sections relevant to the user's current task.
+- After receiving the list, analyze the sections and use `get_documentation` to fetch ALL relevant details before writing or modifying code.
+
+## Coding Standards (Svelte 5 & Tailwind)
+- Use Svelte 5 Runes for reactivity: 
+  - Use `$state()` for reactive data.
+  - Use `$derived()` for computed values.
+  - Use `$props()` for component inputs.
+- Backend Logic: 
+  - Use SvelteKit `+page.server.js` for secure database loading.
+  - Use SvelteKit Form Actions (`export const actions = {}`) for all database mutations.
+- Styling:
+  - Maintain the aesthetic of the fuel tracker using Tailwind CSS utility classes.
+  - Keep components modular, small, and reusable.
