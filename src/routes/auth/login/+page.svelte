@@ -20,7 +20,7 @@
 			});
 
 			if (authError) {
-				error = authError.message;
+				error = t('auth.signInFailed');
 				return;
 			}
 
@@ -47,7 +47,7 @@
 				}
 			}
 		} catch (err) {
-			error = 'An unexpected error occurred';
+			error = t('common.unexpectedError');
 			console.error(err);
 		} finally {
 			loading = false;
@@ -58,17 +58,17 @@
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl p-6 flex flex-col justify-center">
 	<div class="space-y-6">
 		<div class="text-center mb-8">
-			<h1 class="text-3xl font-bold text-dark">Welcome Back</h1>
-			<p class="text-slate-400 text-sm">Sign in to your fuel analytics</p>
+			<h1 class="text-3xl font-bold text-dark">{t('dashboard.welcome')}</h1>
+			<p class="text-slate-400 text-sm">{t('auth.signInSubtitle')}</p>
 		</div>
 
 		<form onsubmit={handleLogin} class="space-y-4">
 			<div class="space-y-1.5">
-				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.email')}</label>
 				<input 
 					id="email"
 					type="email" 
-					placeholder="name@example.com" 
+					placeholder={t('auth.emailPlaceholder')}
 					bind:value={email}
 					required
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
@@ -76,7 +76,7 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.password')}</label>
 				<input 
 					id="password"
 					type="password" 
@@ -99,16 +99,16 @@
 				class="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{#if loading}
-					Signing in...
+					{t('auth.signingIn')}
 				{:else}
-					Sign In
+					{t('auth.signIn')}
 				{/if}
 			</button>
 		</form>
 
 		<p class="text-center text-xs text-slate-500">
-			Don't have an account? 
-			<a href="/auth/register" class="text-primary font-bold ml-1">Register</a>
+			{t('auth.noAccount')}
+			<a href="/auth/register" class="text-primary font-bold ml-1">{t('auth.register')}</a>
 		</p>
 	</div>
 </div>

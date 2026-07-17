@@ -27,7 +27,7 @@
 			});
 
 			if (authError) {
-				error = authError.message;
+				error = t('auth.registrationFailed');
 				return;
 			}
 
@@ -52,7 +52,7 @@
 				goto('/auth/car-setup');
 			}
 		} catch (err) {
-			error = 'An unexpected error occurred';
+			error = t('common.unexpectedError');
 			console.error(err);
 		} finally {
 			loading = false;
@@ -62,15 +62,15 @@
 
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl p-6 flex flex-col justify-center">
 	<div class="space-y-6">
-		<h1 class="text-2xl font-bold text-dark">Create Account</h1>
+		<h1 class="text-2xl font-bold text-dark">{t('auth.createAccount')}</h1>
 
 		<form onsubmit={handleRegister} class="space-y-4">
 			<div class="space-y-1.5">
-				<label for="username" class="text-xs font-bold text-slate-500 uppercase ml-1">Username</label>
+				<label for="username" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.username')}</label>
 				<input 
 					id="username"
 					type="text" 
-					placeholder="Driver123" 
+					placeholder={t('auth.usernamePlaceholder')}
 					bind:value={username}
 					required
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
@@ -78,11 +78,11 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">Email</label>
+				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.email')}</label>
 				<input 
 					id="email"
 					type="email" 
-					placeholder="name@example.com" 
+					placeholder={t('auth.emailPlaceholder')}
 					bind:value={email}
 					required
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
@@ -90,7 +90,7 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.password')}</label>
 				<input 
 					id="password"
 					type="password" 
@@ -113,16 +113,16 @@
 				class="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-sky-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{#if loading}
-					Creating account...
+					{t('auth.creatingAccount')}
 				{:else}
-					Continue
+					{t('auth.continue')}
 				{/if}
 			</button>
 		</form>
 
 		<p class="text-center text-xs text-slate-500">
-			Already have an account? 
-			<a href="/auth/login" class="text-primary font-bold ml-1">Sign In</a>
+			{t('auth.hasAccount')}
+			<a href="/auth/login" class="text-primary font-bold ml-1">{t('auth.signIn')}</a>
 		</p>
 	</div>
 </div>

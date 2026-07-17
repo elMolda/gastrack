@@ -36,7 +36,7 @@
 			const { data: { user }, error: userError } = await supabase.auth.getUser();
 			
 			if (userError || !user) {
-				error = 'User not authenticated. Please try again.';
+				error = t('auth.notAuthenticated');
 				loading = false;
 				return;
 			}
@@ -53,7 +53,7 @@
 			// Redirect to dashboard
 			goto('/');
 		} catch (err) {
-			error = 'An unexpected error occurred';
+			error = t('common.unexpectedError');
 			console.error(err);
 		} finally {
 			loading = false;
@@ -65,31 +65,31 @@
 	{#if checkingAuth}
 		<div class="text-center py-12">
 			<div class="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-			<p class="text-slate-600">Checking authentication...</p>
+			<p class="text-slate-600">{t('auth.checkingAuthentication')}</p>
 		</div>
 	{:else}
 		<div class="space-y-6">
-			<h1 class="text-2xl font-bold text-dark">Add Your Vehicle</h1>
+			<h1 class="text-2xl font-bold text-dark">{t('cars.addCar')}</h1>
 
 		<form onsubmit={handleSubmit} class="space-y-4">
 			<div class="grid grid-cols-2 gap-4">
 				<div class="space-y-1.5">
-					<label for="brand" class="text-xs font-bold text-slate-500 uppercase ml-1">Brand</label>
+					<label for="brand" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.brand')}</label>
 					<input 
 						id="brand"
 						type="text" 
-						placeholder="e.g. VW" 
+						placeholder={t('cars.brandPlaceholder')}
 						bind:value={brand}
 						required
 						class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
 					/>
 				</div>
 				<div class="space-y-1.5">
-					<label for="model" class="text-xs font-bold text-slate-500 uppercase ml-1">Model</label>
+					<label for="model" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.model')}</label>
 					<input 
 						id="model"
 						type="text" 
-						placeholder="e.g. Voyage" 
+						placeholder={t('cars.modelPlaceholder')}
 						bind:value={model}
 						required
 						class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
@@ -98,11 +98,11 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="year" class="text-xs font-bold text-slate-500 uppercase ml-1">Year</label>
+				<label for="year" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.year')}</label>
 				<input 
 					id="year"
 					type="number" 
-					placeholder="2019" 
+					placeholder={t('cars.yearPlaceholder')}
 					bind:value={year}
 					required
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
@@ -110,28 +110,28 @@
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="licensePlate" class="text-xs font-bold text-slate-500 uppercase ml-1">License Plate (Optional)</label>
+				<label for="licensePlate" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.licensePlate')}</label>
 				<input 
 					id="licensePlate"
 					type="text" 
-					placeholder="ABC-123" 
+					placeholder={t('cars.licensePlatePlaceholder')}
 					bind:value={licensePlate}
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm" 
 				/>
 			</div>
 
 			<div class="space-y-1.5">
-				<label for="carPicture" class="text-xs font-bold text-slate-500 uppercase ml-1">Car Picture (Optional)</label>
+				<label for="carPicture" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('cars.carPicture')}</label>
 				<div id="carPicture" class="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center text-slate-400 hover:border-primary transition cursor-pointer">
 					<i class="fas fa-camera text-2xl mb-2"></i>
-					<p class="text-xs">Upload Image</p>
+					<p class="text-xs">{t('cars.uploadImage')}</p>
 				</div>
 			</div>
 
 			<div class="flex items-center justify-between p-4 bg-white rounded-xl border border-slate-200">
 				<div>
-					<p class="text-sm font-bold text-slate-700">Set as default vehicle</p>
-					<p class="text-xs text-slate-500">This car will be selected for new fuel logs</p>
+					<p class="text-sm font-bold text-slate-700">{t('cars.setAsDefault')}</p>
+					<p class="text-xs text-slate-500">{t('cars.setAsDefaultDescription')}</p>
 				</div>
 				<label class="relative inline-flex items-center cursor-pointer">
 					<input type="checkbox" bind:checked={isDefault} class="sr-only peer">
@@ -151,9 +151,9 @@
 				class="w-full bg-dark text-white py-4 rounded-xl font-bold hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{#if loading}
-					Saving...
+					{t('cars.saving')}
 				{:else}
-					Finish Setup
+					{t('cars.finishSetup')}
 				{/if}
 			</button>
 		</form>

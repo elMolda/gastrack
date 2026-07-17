@@ -64,7 +64,7 @@
 			await invalidateAll();
 		} catch (err) {
 			console.error('Error deleting car:', err);
-			errorMessage = 'Failed to delete vehicle. Please try again.';
+			errorMessage = t('cars.deleteFailed');
 		} finally {
 			deleting = false;
 		}
@@ -76,7 +76,7 @@
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
+			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label={t('common.goBack')}>
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('cars.manageCars')}</h1>
@@ -127,7 +127,7 @@
 								<button
 									onclick={(e) => { e.stopPropagation(); toggleMenu(car.id); }}
 									class="w-9 h-9 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
-									aria-label="More options"
+									aria-label={t('common.moreOptions')}
 									aria-expanded={openMenuId === car.id}
 								>
 									<i class="fas fa-ellipsis-v"></i>

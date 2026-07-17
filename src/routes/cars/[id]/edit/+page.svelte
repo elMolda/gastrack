@@ -34,7 +34,7 @@
 			goto('/cars');
 		} catch (err) {
 			console.error('Error updating car:', err);
-			errorMessage = 'Failed to save vehicle. Please try again.';
+			errorMessage = t('cars.saveFailed');
 		} finally {
 			loading = false;
 		}
@@ -44,7 +44,7 @@
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/cars" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
+			<a href="/cars" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label={t('common.goBack')}>
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('cars.editCar')}</h1>
@@ -59,7 +59,7 @@
 				<input
 					id="carBrand"
 					type="text"
-					placeholder="e.g. VW"
+					placeholder={t('cars.brandPlaceholder')}
 					bind:value={brand}
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm text-slate-900"
 					required
@@ -70,7 +70,7 @@
 				<input
 					id="carModel"
 					type="text"
-					placeholder="e.g. Voyage"
+					placeholder={t('cars.modelPlaceholder')}
 					bind:value={model}
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm text-slate-900"
 					required
@@ -83,7 +83,7 @@
 			<input
 				id="carYear"
 				type="number"
-				placeholder="2019"
+				placeholder={t('cars.yearPlaceholder')}
 				bind:value={year}
 				class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm text-slate-900"
 				required
@@ -95,7 +95,7 @@
 			<input
 				id="carLicensePlate"
 				type="text"
-				placeholder="ABC-123"
+				placeholder={t('cars.licensePlatePlaceholder')}
 				bind:value={licensePlate}
 				class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm text-slate-900"
 			/>

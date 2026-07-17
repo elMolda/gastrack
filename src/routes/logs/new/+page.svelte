@@ -99,7 +99,7 @@
 	<!-- Header -->
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
+			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label={t('common.goBack')}>
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('logs.newFillUp')}</h1>
@@ -257,7 +257,7 @@
 							id="carReported"
 							type="number" 
 							step="any" 
-							placeholder="e.g. 10.5" 
+							placeholder={t('logs.efficiencyPlaceholder')}
 							bind:value={carReported}
 							class="w-full bg-transparent p-3.5 outline-none font-semibold text-slate-900"
 						/>
@@ -276,9 +276,12 @@
 						<div class="text-xs text-slate-500 font-medium bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-start gap-2">
 							<i class="fas fa-info-circle text-primary mt-0.5"></i>
 							<div>
-								<p>Normalized dashboard read: <strong class="text-slate-700">{liveCarEfficiencyInKmGal.toFixed(1)} {t('units.kmPerGal')}</strong></p>
+								<p>{t('logs.normalizedDashboardRead')} <strong class="text-slate-700">{liveCarEfficiencyInKmGal.toFixed(1)} {t('units.kmPerGal')}</strong></p>
 								<p class="mt-1">
-									Your real pump math is <strong class={liveDeviation >= 0 ? "text-emerald-600" : "text-amber-600"}>{Math.abs(liveDeviation).toFixed(1)}% {liveDeviation >= 0 ? 'better' : 'worse'}</strong> than what your car displays.
+									{t('logs.pumpComparison', {
+										percentage: Math.abs(liveDeviation).toFixed(1),
+										comparison: t(liveDeviation >= 0 ? 'logs.better' : 'logs.worse')
+									})}
 								</p>
 							</div>
 						</div>

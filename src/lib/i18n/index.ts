@@ -29,7 +29,9 @@ const translations = {
 			mixed: 'Mixed',
 			highway: 'Highway',
 			optimistic: 'Optimistic',
-			pessimistic: 'Pessimistic'
+			pessimistic: 'Pessimistic',
+			filledDistance: 'Filled {distance} {unit}',
+			dashboardRead: 'Dashboard read:'
 		},
 		// Cars
 		cars: {
@@ -53,7 +55,13 @@ const translations = {
 			deleteConfirm: 'Delete {brand} {model}? All fuel logs for this vehicle will also be removed.',
 			deleteLastCarWarning: 'This is your only vehicle. You will need to add a new one to continue tracking.',
 			saving: 'Saving...',
-			deleting: 'Deleting...'
+			deleting: 'Deleting...',
+			brandPlaceholder: 'e.g. VW',
+			modelPlaceholder: 'e.g. Voyage',
+			yearPlaceholder: '2019',
+			licensePlatePlaceholder: 'ABC-123',
+			saveFailed: 'Failed to save vehicle. Please try again.',
+			deleteFailed: 'Failed to delete vehicle. Please try again.'
 		},
 		// Logs
 		logs: {
@@ -69,7 +77,36 @@ const translations = {
 			calculatedCost: 'Calculated Cost',
 			saveLogEntry: 'Save Log Entry',
 			save: 'Save',
-			back: 'Back'
+			back: 'Back',
+			efficiencyPlaceholder: 'e.g. 10.5',
+			normalizedDashboardRead: 'Normalized dashboard read:',
+			pumpComparison: 'Your real pump math is {percentage}% {comparison} than what your car displays.',
+			better: 'better',
+			worse: 'worse'
+		},
+		auth: {
+			signInSubtitle: 'Sign in to your fuel analytics',
+			email: 'Email',
+			password: 'Password',
+			username: 'Username',
+			emailPlaceholder: 'name@example.com',
+			usernamePlaceholder: 'Driver123',
+			signingIn: 'Signing in...',
+			signIn: 'Sign In',
+			signInFailed: 'Unable to sign in. Check your email and password.',
+			register: 'Register',
+			noAccount: "Don't have an account?",
+			createAccount: 'Create Account',
+			creatingAccount: 'Creating account...',
+			registrationFailed: 'Unable to create your account. Please try again.',
+			continue: 'Continue',
+			hasAccount: 'Already have an account?',
+			checkingAuthentication: 'Checking authentication...',
+			notAuthenticated: 'User not authenticated. Please try again.'
+		},
+		layout: {
+			switchToSpanish: 'Switch to Spanish',
+			switchToEnglish: 'Switch to English'
 		},
 		// Navigation
 		nav: {
@@ -100,6 +137,7 @@ const translations = {
 			appInfo: 'App Information',
 			version: 'Version',
 			buildDate: 'Build Date',
+			buildDateValue: 'July 2026',
 			developer: 'Developer',
 			supportFeedback: 'Support & Feedback',
 			helpSupport: 'Help & Support',
@@ -111,6 +149,9 @@ const translations = {
 			resetWarning: 'This will delete all your fuel logs and car data. This action cannot be undone.',
 			resetConfirm: 'Are you sure you want to delete all fuel logs and vehicles? Your account will be kept.',
 			resetting: 'Resetting...',
+			resetFailed: 'Failed to reset data. Please try again.',
+			selectEnglish: 'Select English language',
+			selectSpanish: 'Select Spanish language',
 			account: 'Account',
 			signedIn: 'Signed in',
 			logout: 'Logout',
@@ -124,7 +165,12 @@ const translations = {
 			delete: 'Delete',
 			edit: 'Edit',
 			yes: 'Yes',
-			no: 'No'
+			no: 'No',
+			goBack: 'Go back',
+			moreOptions: 'More options',
+			unexpectedError: 'An unexpected error occurred',
+			notAvailable: 'N/A',
+			total: 'total'
 		}
 	},
 	es: {
@@ -150,7 +196,9 @@ const translations = {
 			mixed: 'Mixto',
 			highway: 'Carretera',
 			optimistic: 'Optimista',
-			pessimistic: 'Pesimista'
+			pessimistic: 'Pesimista',
+			filledDistance: 'Carga de {distance} {unit}',
+			dashboardRead: 'Lectura del tablero:'
 		},
 		// Cars
 		cars: {
@@ -174,7 +222,13 @@ const translations = {
 			deleteConfirm: '¿Eliminar {brand} {model}? También se eliminarán todos los registros de combustible de este vehículo.',
 			deleteLastCarWarning: 'Este es tu único vehículo. Necesitarás agregar uno nuevo para continuar.',
 			saving: 'Guardando...',
-			deleting: 'Eliminando...'
+			deleting: 'Eliminando...',
+			brandPlaceholder: 'p. ej., VW',
+			modelPlaceholder: 'p. ej., Voyage',
+			yearPlaceholder: '2019',
+			licensePlatePlaceholder: 'ABC-123',
+			saveFailed: 'No se pudo guardar el vehículo. Inténtalo de nuevo.',
+			deleteFailed: 'No se pudo eliminar el vehículo. Inténtalo de nuevo.'
 		},
 		// Logs
 		logs: {
@@ -190,7 +244,36 @@ const translations = {
 			calculatedCost: 'Costo Calculado',
 			saveLogEntry: 'Guardar Registro',
 			save: 'Guardar',
-			back: 'Atrás'
+			back: 'Atrás',
+			efficiencyPlaceholder: 'p. ej., 10.5',
+			normalizedDashboardRead: 'Lectura normalizada del tablero:',
+			pumpComparison: 'El cálculo real en la bomba es {percentage}% {comparison} que lo que muestra tu auto.',
+			better: 'mejor',
+			worse: 'peor'
+		},
+		auth: {
+			signInSubtitle: 'Ingresa a tus análisis de combustible',
+			email: 'Correo electrónico',
+			password: 'Contraseña',
+			username: 'Nombre de usuario',
+			emailPlaceholder: 'nombre@ejemplo.com',
+			usernamePlaceholder: 'Conductor123',
+			signingIn: 'Iniciando sesión...',
+			signIn: 'Iniciar sesión',
+			signInFailed: 'No se pudo iniciar sesión. Revisa tu correo y contraseña.',
+			register: 'Registrarse',
+			noAccount: '¿No tienes una cuenta?',
+			createAccount: 'Crear cuenta',
+			creatingAccount: 'Creando cuenta...',
+			registrationFailed: 'No se pudo crear tu cuenta. Inténtalo de nuevo.',
+			continue: 'Continuar',
+			hasAccount: '¿Ya tienes una cuenta?',
+			checkingAuthentication: 'Verificando autenticación...',
+			notAuthenticated: 'Usuario no autenticado. Inténtalo de nuevo.'
+		},
+		layout: {
+			switchToSpanish: 'Cambiar a español',
+			switchToEnglish: 'Cambiar a inglés'
 		},
 		// Navigation
 		nav: {
@@ -221,6 +304,7 @@ const translations = {
 			appInfo: 'Información de la App',
 			version: 'Versión',
 			buildDate: 'Fecha de Compilación',
+			buildDateValue: 'Julio de 2026',
 			developer: 'Desarrollador',
 			supportFeedback: 'Soporte & Comentarios',
 			helpSupport: 'Ayuda & Soporte',
@@ -232,6 +316,9 @@ const translations = {
 			resetWarning: 'Esto eliminará todos tus registros de combustible y datos de autos. Esta acción no se puede deshacer.',
 			resetConfirm: '¿Estás seguro de que deseas eliminar todos los registros de combustible y vehículos? Tu cuenta se mantendrá.',
 			resetting: 'Restableciendo...',
+			resetFailed: 'No se pudieron restablecer los datos. Inténtalo de nuevo.',
+			selectEnglish: 'Seleccionar idioma inglés',
+			selectSpanish: 'Seleccionar idioma español',
 			account: 'Cuenta',
 			signedIn: 'Conectado',
 			logout: 'Cerrar Sesión',
@@ -245,7 +332,12 @@ const translations = {
 			delete: 'Eliminar',
 			edit: 'Editar',
 			yes: 'Sí',
-			no: 'No'
+			no: 'No',
+			goBack: 'Volver',
+			moreOptions: 'Más opciones',
+			unexpectedError: 'Ocurrió un error inesperado',
+			notAvailable: 'No disponible',
+			total: 'total'
 		}
 	}
 } as const;

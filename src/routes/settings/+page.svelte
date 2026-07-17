@@ -61,7 +61,7 @@
 			goto('/auth/car-setup');
 		} catch (err) {
 			console.error('Error resetting data:', err);
-			resetError = 'Failed to reset data. Please try again.';
+			resetError = t('settings.resetFailed');
 		} finally {
 			resetting = false;
 		}
@@ -72,7 +72,7 @@
 	<!-- Header -->
 	<div class="bg-dark text-white px-5 pt-10 pb-6 rounded-b-[2rem] shadow-lg">
 		<div class="flex justify-between items-center mb-6">
-			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
+			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label={t('common.goBack')}>
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('nav.settings')}</h1>
@@ -114,7 +114,7 @@
 					class={`w-full flex items-center justify-between p-3 rounded-xl border transition ${
 						selectedLanguage === 'en' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
 					}`}
-					aria-label="Select English language"
+					aria-label={t('settings.selectEnglish')}
 				>
 					<div class="flex items-center gap-3">
 						<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -135,7 +135,7 @@
 					class={`w-full flex items-center justify-between p-3 rounded-xl border transition ${
 						selectedLanguage === 'es' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
 					}`}
-					aria-label="Select Spanish language"
+					aria-label={t('settings.selectSpanish')}
 				>
 					<div class="flex items-center gap-3">
 						<div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
@@ -172,7 +172,7 @@
 				</div>
 				<div class="flex justify-between items-center py-2">
 					<span class="text-sm text-slate-600">{t('settings.buildDate')}</span>
-					<span class="text-sm font-semibold text-slate-800">July 2026</span>
+					<span class="text-sm font-semibold text-slate-800">{t('settings.buildDateValue')}</span>
 				</div>
 				<div class="flex justify-between items-center py-2">
 					<span class="text-sm text-slate-600">{t('settings.developer')}</span>

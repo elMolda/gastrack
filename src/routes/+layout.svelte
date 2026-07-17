@@ -52,7 +52,7 @@
 		<button
 			onclick={toggleLanguage}
 			class="flex items-center gap-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm hover:bg-white transition"
-			title={language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
+			title={language === 'en' ? t('layout.switchToSpanish') : t('layout.switchToEnglish')}
 		>
 			<i class={`fas fa-globe ${language === 'en' ? 'text-blue-500' : 'text-green-500'}`}></i>
 			<span class="text-sm font-medium text-slate-700">{language === 'en' ? 'ES' : 'EN'}</span>

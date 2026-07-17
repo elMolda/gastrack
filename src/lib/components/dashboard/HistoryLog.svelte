@@ -18,16 +18,16 @@
 				</div>
 				<div>
 					<p class="text-xs font-bold text-slate-800">
-						Filled {log.distance} {t(`units.${log.distUnit}`)}
+						{t('dashboard.filledDistance', { distance: String(log.distance), unit: t(`units.${log.distUnit}`) })}
 					</p>
 					<p class="text-[10px] text-slate-400 font-medium">
-						Dashboard read: {log.carReported ? `${log.carReported} ${t(`units.${log.carReportedUnit}`)}` : 'N/A'}
+						{t('dashboard.dashboardRead')} {log.carReported ? `${log.carReported} ${t(`units.${log.carReportedUnit}`)}` : t('common.notAvailable')}
 					</p>
 				</div>
 			</div>
 			<div class="text-right">
 				<p class="text-xs font-extrabold text-slate-800">{(log.distance / log.fuel).toFixed(1)} {t('units.kmPerGal')}</p>
-				<p class="text-[10px] text-slate-400 font-medium">${(log.fuel * log.price).toFixed(2)} total</p>
+				<p class="text-[10px] text-slate-400 font-medium">${(log.fuel * log.price).toFixed(2)} {t('common.total')}</p>
 			</div>
 		</div>
 	{/each}
