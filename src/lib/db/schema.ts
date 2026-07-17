@@ -35,6 +35,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       cars: {
         Row: {
@@ -73,6 +74,15 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'cars_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
       fuel_logs: {
         Row: {
@@ -123,6 +133,22 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'fuel_logs_car_id_fkey'
+            columns: ['car_id']
+            isOneToOne: false
+            referencedRelation: 'cars'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'fuel_logs_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: {

@@ -5,7 +5,7 @@ export type EfficiencyUnit = 'km/gal' | 'km/L' | 'MPG' | 'L/100km';
 export type DriveType = 'city' | 'mixed' | 'highway';
 
 export interface FuelLog {
-	id: number;
+	id: string;
 	date: string;
 	distance: number;
 	distUnit: DistanceUnit;
@@ -15,12 +15,12 @@ export interface FuelLog {
 	driveType: DriveType;
 	carReported: number | null;
 	carReportedUnit: EfficiencyUnit | null;
-	carId?: number; // Associated car
+	carId?: string; // Associated car
 }
 
 // Car types
 export interface Car {
-	id: number;
+	id: string;
 	brand: string;
 	model: string;
 	year: number;
@@ -32,7 +32,7 @@ export interface Car {
 
 // User types (for future auth)
 export interface User {
-	id: number;
+	id: string;
 	username: string;
 	email: string;
 	createdAt: string;

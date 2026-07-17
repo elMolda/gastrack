@@ -82,6 +82,9 @@ CREATE INDEX IF NOT EXISTS idx_fuel_logs_user_id ON fuel_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_fuel_logs_car_id ON fuel_logs(car_id);
 CREATE INDEX IF NOT EXISTS idx_fuel_logs_date ON fuel_logs(date);
 CREATE INDEX IF NOT EXISTS idx_cars_user_id ON cars(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS cars_one_default_per_user
+  ON cars(user_id)
+  WHERE is_default = TRUE;
 
 -- =============================================
 -- ROW LEVEL SECURITY (RLS)

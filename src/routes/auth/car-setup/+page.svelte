@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import { supabase } from '$lib/db/client';
+	import { createCar } from '$lib/db/queries/cars';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 
@@ -40,24 +41,14 @@
 				return;
 			}
 
-			// Create car in database
-			const { data: car, error: carError } = await supabase
-				.from('cars')
-				.insert({
-					user_id: user.id,
-					brand,
-					model,
-					year: parseInt(year),
-					license_plate: licensePlate || null,
-					is_default: isDefault
-				})
-				.select()
-				.single();
-
-			if (carError) {
-				error = carError.message;
-				return;
-			}
+			await createCar({
+				user_id: user.id,
+				brand,
+				model,
+				year: parseInt(year),
+				license_plate: licensePlate || null,
+				is_default: isDefault
+			});
 
 			// Redirect to dashboard
 			goto('/');

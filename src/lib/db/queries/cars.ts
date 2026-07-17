@@ -66,10 +66,15 @@ export async function getDefaultCar(userId: string): Promise<Car | null> {
 export async function createCar(carData: CarInsert): Promise<Car> {
 	// If this car is set as default, unset other defaults
 	if (carData.is_default) {
-		await supabase
+		const { error: clearDefaultsError } = await supabase
 			.from('cars')
 			.update({ is_default: false })
 			.eq('user_id', carData.user_id);
+
+		if (clearDefaultsError) {
+			console.error('Error clearing default car:', clearDefaultsError);
+			throw clearDefaultsError;
+		}
 	}
 
 	const { data, error } = await supabase
@@ -97,11 +102,16 @@ export async function updateCar(carId: string, updates: CarUpdate): Promise<Car>
 			.single();
 
 		if (car) {
-			await supabase
+			const { error: clearDefaultsError } = await supabase
 				.from('cars')
 				.update({ is_default: false })
 				.eq('user_id', car.user_id)
 				.neq('id', carId);
+
+			if (clearDefaultsError) {
+				console.error('Error clearing default car:', clearDefaultsError);
+				throw clearDefaultsError;
+			}
 		}
 	}
 
@@ -120,8 +130,18 @@ export async function updateCar(carId: string, updates: CarUpdate): Promise<Car>
 	return data;
 }
 
-// Delete a car
+// Delete a car and its associated fuel logs
 export async function deleteCar(carId: string): Promise<void> {
+	const { error: logsError } = await supabase
+		.from('fuel_logs')
+		.delete()
+		.eq('car_id', carId);
+
+	if (logsError) {
+		console.error('Error deleting car fuel logs:', logsError);
+		throw logsError;
+	}
+
 	const { error } = await supabase
 		.from('cars')
 		.delete()
@@ -130,5 +150,28 @@ export async function deleteCar(carId: string): Promise<void> {
 	if (error) {
 		console.error('Error deleting car:', error);
 		throw error;
+	}
+}
+
+// Delete all cars and fuel logs for a user (keeps the account)
+export async function resetUserData(userId: string): Promise<void> {
+	const { error: logsError } = await supabase
+		.from('fuel_logs')
+		.delete()
+		.eq('user_id', userId);
+
+	if (logsError) {
+		console.error('Error deleting user fuel logs:', logsError);
+		throw logsError;
+	}
+
+	const { error: carsError } = await supabase
+		.from('cars')
+		.delete()
+		.eq('user_id', userId);
+
+	if (carsError) {
+		console.error('Error deleting user cars:', carsError);
+		throw carsError;
 	}
 }

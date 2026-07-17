@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
 	import { supabase } from '$lib/db/client';
+	import { resetUserData } from '$lib/db/queries/cars';
 	import { goto } from '$app/navigation';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
 
@@ -8,6 +9,9 @@
 	let currentLang = $state<'en' | 'es'>('en');
 	let showSaveButton = $state(false);
 	let userEmail = $state('');
+	let showResetConfirm = $state(false);
+	let resetting = $state(false);
+	let resetError = $state('');
 
 	// Initialize with current language
 	currentLanguage.subscribe((lang) => {
@@ -40,6 +44,28 @@
 		await supabase.auth.signOut();
 		goto('/auth/login');
 	}
+
+	async function handleResetData() {
+		resetting = true;
+		resetError = '';
+
+		try {
+			const { data: { user } } = await supabase.auth.getUser();
+			if (!user) {
+				goto('/auth/login');
+				return;
+			}
+
+			await resetUserData(user.id);
+			showResetConfirm = false;
+			goto('/auth/car-setup');
+		} catch (err) {
+			console.error('Error resetting data:', err);
+			resetError = 'Failed to reset data. Please try again.';
+		} finally {
+			resetting = false;
+		}
+	}
 </script>
 
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
@@ -49,7 +75,7 @@
 			<a href="/" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300" aria-label="Go back">
 				<i class="fas fa-chevron-left"></i>
 			</a>
-			<h1 class="text-xl font-semibold tracking-wide">{t('nav.settings')}</h1>
+			<h1 class="text-xl font-semibold tracking-wide text-white">{t('nav.settings')}</h1>
 			<div class="w-10"></div> <!-- Spacer for alignment -->
 		</div>
 	</div>
@@ -190,7 +216,13 @@
 		<!-- Reset Data (Danger Zone) -->
 		<div class="bg-white rounded-2xl p-4 shadow-sm border border-red-100">
 			<h3 class="text-sm font-bold text-red-700 mb-4">{t('settings.dangerZone')}</h3>
-			<button class="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition">
+			{#if resetError}
+				<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg mb-3">{resetError}</div>
+			{/if}
+			<button
+				onclick={() => showResetConfirm = true}
+				class="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition"
+			>
 				<i class="fas fa-trash-alt"></i>
 				<span class="font-semibold">{t('settings.resetAllData')}</span>
 			</button>
@@ -201,3 +233,28 @@
 	<!-- Navigation Bar -->
 	<Navbar active="settings" />
 </div>
+
+{#if showResetConfirm}
+	<div class="fixed inset-0 z-[60] flex items-center justify-center p-6 bg-black/40">
+		<div class="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl">
+			<h3 class="text-lg font-bold text-slate-800 mb-2">{t('settings.resetAllData')}</h3>
+			<p class="text-sm text-slate-600 mb-6">{t('settings.resetConfirm')}</p>
+			<div class="flex gap-3">
+				<button
+					onclick={() => showResetConfirm = false}
+					disabled={resetting}
+					class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition disabled:opacity-50"
+				>
+					{t('common.cancel')}
+				</button>
+				<button
+					onclick={handleResetData}
+					disabled={resetting}
+					class="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+				>
+					{resetting ? t('settings.resetting') : t('common.delete')}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

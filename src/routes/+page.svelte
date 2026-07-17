@@ -2,6 +2,7 @@
 	import { t } from '$lib/i18n';
 	import type { FuelLog, DashboardStats } from '$lib/types';
 	import { supabase } from '$lib/db/client';
+	import { onMount } from 'svelte';
 	import EfficiencyChart from '$lib/components/dashboard/EfficiencyChart.svelte';
 	import PerformanceByCondition from '$lib/components/dashboard/PerformanceByCondition.svelte';
 	import HistoryLog from '$lib/components/dashboard/HistoryLog.svelte';
@@ -15,50 +16,41 @@
 		};
 	}>();
 
-	// Real-time subscription for fuel log updates
-	let realTimeLogs = $state(data.logs);
-	let realTimeStats = $state(data.stats);
-
-	// Subscribe to fuel_logs table changes
-	supabase
-		.channel('fuel-logs-changes')
-		.on(
-			'postgres_changes',
-			{
-				event: 'INSERT',
-				schema: 'public',
-				table: 'fuel_logs'
-			},
-			async (payload) => {
-				// When a new log is inserted, refresh the data
-				const { data: { user } } = await supabase.auth.getUser();
-				if (user && payload.new.user_id === user.id) {
-					// In a real app, you would fetch the updated data
-					// For now, we'll just reload the page to get fresh data
-					window.location.reload();
+	onMount(() => {
+		const channel = supabase
+			.channel('fuel-logs-changes')
+			.on(
+				'postgres_changes',
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'fuel_logs'
+				},
+				async (payload) => {
+					const { data: { user } } = await supabase.auth.getUser();
+					if (user && payload.new.user_id === user.id) {
+						window.location.reload();
+					}
 				}
-			}
-		)
-		.on(
-			'postgres_changes',
-			{
-				event: 'DELETE',
-				schema: 'public',
-				table: 'fuel_logs'
-			},
-			async (payload) => {
-				const { data: { user } } = await supabase.auth.getUser();
-				if (user && payload.old.user_id === user.id) {
-					window.location.reload();
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: 'DELETE',
+					schema: 'public',
+					table: 'fuel_logs'
+				},
+				async (payload) => {
+					const { data: { user } } = await supabase.auth.getUser();
+					if (user && payload.old.user_id === user.id) {
+						window.location.reload();
+					}
 				}
-			}
-		)
-		.subscribe();
+			)
+			.subscribe();
 
-	// Cleanup subscription on component destroy
-	$effect(() => {
 		return () => {
-			supabase.channel('fuel-logs-changes').unsubscribe();
+			supabase.removeChannel(channel);
 		};
 	});
 </script>

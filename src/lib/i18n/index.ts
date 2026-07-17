@@ -34,6 +34,7 @@ const translations = {
 		// Cars
 		cars: {
 			addCar: 'Add Your Vehicle',
+			editCar: 'Edit Vehicle',
 			brand: 'Brand',
 			model: 'Model',
 			year: 'Year',
@@ -41,7 +42,18 @@ const translations = {
 			carPicture: 'Car Picture (Optional)',
 			uploadImage: 'Upload Image',
 			finishSetup: 'Finish Setup',
-			manageCars: 'Manage Vehicles'
+			manageCars: 'Manage Vehicles',
+			defaultVehicle: 'Default Vehicle',
+			setAsDefault: 'Set as default vehicle',
+			setAsDefaultDescription: 'This car will be selected for new fuel logs',
+			noPlate: 'No plate',
+			noVehicles: 'No vehicles yet',
+			noVehiclesDescription: 'Add your first vehicle to start tracking fuel efficiency',
+			deleteCar: 'Delete Vehicle',
+			deleteConfirm: 'Delete {brand} {model}? All fuel logs for this vehicle will also be removed.',
+			deleteLastCarWarning: 'This is your only vehicle. You will need to add a new one to continue tracking.',
+			saving: 'Saving...',
+			deleting: 'Deleting...'
 		},
 		// Logs
 		logs: {
@@ -97,6 +109,8 @@ const translations = {
 			dangerZone: 'Danger Zone',
 			resetAllData: 'Reset All Data',
 			resetWarning: 'This will delete all your fuel logs and car data. This action cannot be undone.',
+			resetConfirm: 'Are you sure you want to delete all fuel logs and vehicles? Your account will be kept.',
+			resetting: 'Resetting...',
 			account: 'Account',
 			signedIn: 'Signed in',
 			logout: 'Logout',
@@ -141,6 +155,7 @@ const translations = {
 		// Cars
 		cars: {
 			addCar: 'Agregar Vehículo',
+			editCar: 'Editar Vehículo',
 			brand: 'Marca',
 			model: 'Modelo',
 			year: 'Año',
@@ -148,7 +163,18 @@ const translations = {
 			carPicture: 'Foto del Auto (Opcional)',
 			uploadImage: 'Subir Imagen',
 			finishSetup: 'Finalizar Configuración',
-			manageCars: 'Administrar Vehículos'
+			manageCars: 'Administrar Vehículos',
+			defaultVehicle: 'Vehículo Predeterminado',
+			setAsDefault: 'Establecer como vehículo predeterminado',
+			setAsDefaultDescription: 'Este auto se seleccionará para nuevos registros de combustible',
+			noPlate: 'Sin placa',
+			noVehicles: 'Aún no hay vehículos',
+			noVehiclesDescription: 'Agrega tu primer vehículo para comenzar a rastrear la eficiencia del combustible',
+			deleteCar: 'Eliminar Vehículo',
+			deleteConfirm: '¿Eliminar {brand} {model}? También se eliminarán todos los registros de combustible de este vehículo.',
+			deleteLastCarWarning: 'Este es tu único vehículo. Necesitarás agregar uno nuevo para continuar.',
+			saving: 'Guardando...',
+			deleting: 'Eliminando...'
 		},
 		// Logs
 		logs: {
@@ -204,6 +230,8 @@ const translations = {
 			dangerZone: 'Zona de Peligro',
 			resetAllData: 'Restablecer Todos los Datos',
 			resetWarning: 'Esto eliminará todos tus registros de combustible y datos de autos. Esta acción no se puede deshacer.',
+			resetConfirm: '¿Estás seguro de que deseas eliminar todos los registros de combustible y vehículos? Tu cuenta se mantendrá.',
+			resetting: 'Restableciendo...',
 			account: 'Cuenta',
 			signedIn: 'Conectado',
 			logout: 'Cerrar Sesión',

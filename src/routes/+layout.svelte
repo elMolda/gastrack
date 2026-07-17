@@ -55,7 +55,7 @@
 			title={language === 'en' ? 'Cambiar a Español' : 'Switch to English'}
 		>
 			<i class={`fas fa-globe ${language === 'en' ? 'text-blue-500' : 'text-green-500'}`}></i>
-			<span class="text-sm font-medium">{language === 'en' ? 'ES' : 'EN'}</span>
+			<span class="text-sm font-medium text-slate-700">{language === 'en' ? 'ES' : 'EN'}</span>
 		</button>
 	</div>
 
