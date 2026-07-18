@@ -1,4 +1,4 @@
-import { createServerSupabase } from '$lib/db/client';
+import { createServerSupabase } from '$lib/db/server';
 import { redirect, type Handle } from '@sveltejs/kit';
 
 // Public routes that don't require authentication

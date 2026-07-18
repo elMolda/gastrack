@@ -1,4 +1,4 @@
-import { createServerSupabaseFromCookies } from '$lib/db/client';
+import { createServerSupabaseFromCookies } from '$lib/db/server';
 import { error, redirect } from '@sveltejs/kit';
 
 export async function load({

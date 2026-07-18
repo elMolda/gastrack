@@ -1,42 +1,82 @@
-# sv
+# GasTrack
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit application for tracking vehicles and fuel consumption.
 
-## Creating a project
+## Local development
 
-If you're seeing this, you've probably already done this step. Congrats!
+Local development runs entirely in Docker. It includes the app, PostgreSQL,
+Supabase Auth, PostgREST, Realtime, and Kong. Do not run `npm run dev` on the
+host: the Compose stack deliberately points the app at its own local Supabase
+services instead of the production project.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+Requirements:
 
-To recreate this project with the same configuration:
+- Docker Desktop with Docker Compose
+- Ports `5173`, `8000`, and `54322` available on localhost
 
-```sh
-# recreate this project
-npx sv@0.16.3 create --template minimal --types ts --install npm ./
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Start the stack:
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+docker compose up --build
 ```
 
-## Building
+Open the app at <http://localhost:5173>. Source files are bind-mounted, so
+SvelteKit reloads when they change.
 
-To create a production version of your app:
+Run it in the background:
 
 ```sh
-npm run build
+docker compose up -d --build
+docker compose logs -f app
 ```
 
-You can preview the production build with `npm run preview`.
+Stop the stack while retaining local data:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```sh
+docker compose down
+```
+
+## Database migrations
+
+SQL migrations live in `supabase/migrations`. On every Compose startup, the
+one-shot `migrations` service applies all pending migrations before the API and
+app start.
+
+Add a migration using a UTC timestamp:
+
+```text
+supabase/migrations/YYYYMMDDHHMMSS_description.sql
+```
+
+Apply it by rebuilding and starting the stack:
+
+```sh
+docker compose up --build
+```
+
+The migration runner connects only to the Compose database hostname (`db`) and
+uses deterministic local credentials. It cannot target the production
+Supabase project.
+
+## Reset local data
+
+This permanently removes only the Docker-managed local database and then
+recreates it from all migrations:
+
+```sh
+docker compose down -v
+docker compose up --build
+```
+
+The local database is also exposed at `localhost:54322` for inspection. Its
+development-only credentials are in `docker-compose.yml`; they must never be
+reused in a deployed environment.
+
+## Project checks
+
+Run checks inside the app container:
+
+```sh
+docker compose exec app npm run check
+docker compose exec app npm run build
+```
