@@ -43,17 +43,30 @@
 				<i class="fas fa-chevron-left"></i>
 			</a>
 			<h1 class="text-xl font-semibold tracking-wide text-white">{t('cars.manageCars')}</h1>
-			<a href="/cars/new" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-white hover:text-primary transition" aria-label={t('cars.addCar')}>
+			<button
+				type="button"
+				disabled
+				class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 cursor-not-allowed opacity-60"
+				aria-label={t('cars.addCarComingSoon')}
+				title={t('cars.addCarComingSoonHint')}
+			>
 				<i class="fas fa-plus"></i>
-			</a>
+			</button>
 		</div>
 	</div>
 
 	<div class="p-6 space-y-6">
-		<a href="/cars/new" class="block w-full bg-primary hover:bg-sky-600 text-white font-bold text-md py-4 rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition text-center">
+		<button
+			type="button"
+			disabled
+			class="block w-full bg-primary/40 text-white font-bold text-md py-4 rounded-xl shadow-none cursor-not-allowed opacity-70 text-center"
+			aria-label={t('cars.addCarComingSoon')}
+			title={t('cars.addCarComingSoonHint')}
+		>
 			<i class="fas fa-plus mr-2"></i>
-			{t('cars.addCar')}
-		</a>
+			{t('cars.addCarComingSoon')}
+		</button>
+		<p class="text-xs text-slate-500 text-center -mt-3">{t('cars.addCarComingSoonHint')}</p>
 
 		{#if form?.error}
 			<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg">{t('cars.deleteFailed')}</div>

@@ -6,7 +6,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) {
 		throw redirect(303, '/auth/login');
 	}
-	return {};
+	// Multi-car add is paused until car-scoped logs + dashboard filter ship (see GitHub issue).
+	throw redirect(303, '/cars');
 };
 
 export const actions: Actions = {
