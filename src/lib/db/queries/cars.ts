@@ -1,5 +1,5 @@
 import { supabase } from '../client';
-import type { Database } from '../schema';
+import type { Database } from '../supabase-types';
 
 type Car = Database['public']['Tables']['cars']['Row'];
 type CarInsert = Database['public']['Tables']['cars']['Insert'];

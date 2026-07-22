@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { env } from '$env/dynamic/private';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { Database } from './schema';
+import type { Database } from './supabase-types';
 
 function serverFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
 	if (!env.PRIVATE_SUPABASE_URL) {

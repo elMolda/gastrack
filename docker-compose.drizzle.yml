@@ -1,0 +1,28 @@
+# Plain Postgres for Drizzle local development (Migration 1+).
+# Does not replace the existing Supabase stack — that stays until Migration 7.
+#
+#   docker compose -f docker-compose.drizzle.yml up -d
+#   DATABASE_URL=postgresql://gastrack:gastrack@127.0.0.1:5433/gastrack npm run db:migrate
+#
+name: gastrack-drizzle
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_USER: gastrack
+      POSTGRES_PASSWORD: gastrack
+      POSTGRES_DB: gastrack
+    volumes:
+      - drizzle-pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastrack -d gastrack"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  drizzle-pg-data:

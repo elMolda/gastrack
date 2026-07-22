@@ -1,5 +1,5 @@
 import { supabase } from '../client';
-import type { Database } from '../schema';
+import type { Database } from '../supabase-types';
 
 type FuelLog = Database['public']['Tables']['fuel_logs']['Row'];
 type FuelLogInsert = Database['public']['Tables']['fuel_logs']['Insert'];
