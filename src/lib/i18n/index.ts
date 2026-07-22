@@ -346,9 +346,21 @@ const translations = {
 	}
 } as const;
 
-// Language store
-const storedLang = browser ? localStorage.getItem('language') as Language : 'en';
-const defaultLang: Language = storedLang && (storedLang === 'en' || storedLang === 'es') ? storedLang : 'en';
+// Language store — prefer saved choice, else browser locale, else English.
+function detectBrowserLanguage(): Language {
+	if (!browser) return 'en';
+	const candidates = [...(navigator.languages ?? []), navigator.language];
+	for (const tag of candidates) {
+		const code = tag?.toLowerCase().split('-')[0];
+		if (code === 'es') return 'es';
+		if (code === 'en') return 'en';
+	}
+	return 'en';
+}
+
+const storedLang = browser ? localStorage.getItem('language') : null;
+const defaultLang: Language =
+	storedLang === 'en' || storedLang === 'es' ? storedLang : detectBrowserLanguage();
 
 export const currentLanguage = writable<Language>(defaultLang);
 
