@@ -4,7 +4,7 @@
 	import { deleteCar, updateCar } from '$lib/db/queries/cars';
 	import { goto, invalidateAll } from '$app/navigation';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
-	import type { Database } from '$lib/db/schema';
+	import type { Database } from '$lib/db/supabase-types';
 
 	type DbCar = Database['public']['Tables']['cars']['Row'];
 

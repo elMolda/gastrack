@@ -1,167 +1,82 @@
-// Database types for Supabase
-// These types will be generated automatically once we have a Supabase project
-// For now, we define them manually based on our planned schema
+import { sql } from 'drizzle-orm';
+import {
+	boolean,
+	date,
+	integer,
+	numeric,
+	pgTable,
+	text,
+	timestamp,
+	uniqueIndex,
+	uuid
+} from 'drizzle-orm/pg-core';
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+/**
+ * Owned domain identity. Not FK'd to Better Auth's `user` table —
+ * `auth_subject` maps the provider id so we can swap auth later.
+ * Better Auth tables (user/session/account/verification) land in Migration 2.
+ */
+export const users = pgTable(
+	'users',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		email: text('email').notNull().unique(),
+		username: text('username'),
+		authProvider: text('auth_provider').notNull(),
+		authSubject: text('auth_subject').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [uniqueIndex('users_auth_provider_subject_idx').on(t.authProvider, t.authSubject)]
+);
 
-export interface Database {
-  public: {
-    Tables: {
-      users: {
-        Row: {
-          id: string
-          email: string
-          username: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          email: string
-          username?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          username?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      cars: {
-        Row: {
-          id: string
-          user_id: string
-          brand: string
-          model: string
-          year: number
-          license_plate: string | null
-          picture_url: string | null
-          is_default: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          brand: string
-          model: string
-          year: number
-          license_plate?: string | null
-          picture_url?: string | null
-          is_default?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          brand?: string
-          model?: string
-          year?: number
-          license_plate?: string | null
-          picture_url?: string | null
-          is_default?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'cars_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-      fuel_logs: {
-        Row: {
-          id: string
-          user_id: string
-          car_id: string
-          date: string
-          distance: number
-          dist_unit: 'km' | 'mi'
-          fuel: number
-          fuel_unit: 'gal' | 'L'
-          price: number
-          drive_type: 'city' | 'mixed' | 'highway'
-          car_reported: number | null
-          car_reported_unit: 'km/gal' | 'km/L' | 'MPG' | 'L/100km' | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          car_id: string
-          date: string
-          distance: number
-          dist_unit: 'km' | 'mi'
-          fuel: number
-          fuel_unit: 'gal' | 'L'
-          price: number
-          drive_type: 'city' | 'mixed' | 'highway'
-          car_reported?: number | null
-          car_reported_unit?: 'km/gal' | 'km/L' | 'MPG' | 'L/100km' | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          car_id?: string
-          date?: string
-          distance?: number
-          dist_unit?: 'km' | 'mi'
-          fuel?: number
-          fuel_unit?: 'gal' | 'L'
-          price?: number
-          drive_type?: 'city' | 'mixed' | 'highway'
-          car_reported?: number | null
-          car_reported_unit?: 'km/gal' | 'km/L' | 'MPG' | 'L/100km' | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'fuel_logs_car_id_fkey'
-            columns: ['car_id']
-            isOneToOne: false
-            referencedRelation: 'cars'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'fuel_logs_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+export const cars = pgTable(
+	'cars',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		userId: uuid('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		brand: text('brand').notNull(),
+		model: text('model').notNull(),
+		year: integer('year').notNull(),
+		licensePlate: text('license_plate'),
+		pictureUrl: text('picture_url'),
+		isDefault: boolean('is_default').notNull().default(false),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		uniqueIndex('cars_one_default_per_user')
+			.on(t.userId)
+			.where(sql`${t.isDefault} = true`)
+	]
+);
+
+export const fuelLogs = pgTable('fuel_logs', {
+	id: uuid('id').defaultRandom().primaryKey(),
+	userId: uuid('user_id')
+		.notNull()
+		.references(() => users.id, { onDelete: 'cascade' }),
+	carId: uuid('car_id')
+		.notNull()
+		.references(() => cars.id, { onDelete: 'cascade' }),
+	date: date('date').notNull(),
+	distance: numeric('distance', { precision: 10, scale: 2 }).notNull(),
+	distUnit: text('dist_unit').notNull(), // 'km' | 'mi'
+	fuel: numeric('fuel', { precision: 10, scale: 2 }).notNull(),
+	fuelUnit: text('fuel_unit').notNull(), // 'gal' | 'L'
+	price: numeric('price', { precision: 10, scale: 2 }).notNull(),
+	driveType: text('drive_type').notNull(), // 'city' | 'mixed' | 'highway'
+	carReported: numeric('car_reported', { precision: 10, scale: 2 }),
+	carReportedUnit: text('car_reported_unit'), // 'km/gal' | 'km/L' | 'MPG' | 'L/100km'
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type Car = typeof cars.$inferSelect;
+export type NewCar = typeof cars.$inferInsert;
+export type FuelLog = typeof fuelLogs.$inferSelect;
+export type NewFuelLog = typeof fuelLogs.$inferInsert;

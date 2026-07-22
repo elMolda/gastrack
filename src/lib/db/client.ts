@@ -1,6 +1,6 @@
 import { createBrowserClient } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import type { Database } from './schema';
+import type { Database } from './supabase-types';
 
 // Create a browser-side supabase client
 export const supabase = createBrowserClient<Database>(
