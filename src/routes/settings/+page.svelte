@@ -7,33 +7,14 @@
 
 	let { data, form } = $props();
 
-	let selectedLanguage = $state<'en' | 'es'>('en');
-	let currentLang = $state<'en' | 'es'>('en');
-	let showSaveButton = $state(false);
 	let userEmail = $state(data.email ?? '');
 	let showResetConfirm = $state(false);
 	let resetting = $state(false);
 
-	// Initialize with current language
-	currentLanguage.subscribe((lang) => {
-		currentLang = lang;
-		selectedLanguage = lang;
-	})();
-
-	// Handle language selection
 	function selectLanguage(lang: 'en' | 'es') {
-		selectedLanguage = lang;
-		showSaveButton = lang !== currentLang;
+		setLanguage(lang);
 	}
 
-	// Save language change
-	function saveLanguage() {
-		setLanguage(selectedLanguage);
-		showSaveButton = false;
-		currentLang = selectedLanguage;
-	}
-
-	// Handle logout
 	async function handleLogout() {
 		await authClient.signOut();
 		goto('/auth/login');
@@ -84,7 +65,7 @@
 				<button
 					onclick={() => selectLanguage('en')}
 					class={`w-full flex items-center justify-between p-3 rounded-xl border transition ${
-						selectedLanguage === 'en' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
+						$currentLanguage === 'en' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
 					}`}
 					aria-label={t('settings.selectEnglish')}
 				>
@@ -97,7 +78,7 @@
 							<p class="text-xs text-slate-500">{t('settings.englishDescription')}</p>
 						</div>
 					</div>
-					{#if selectedLanguage === 'en'}
+					{#if $currentLanguage === 'en'}
 						<i class="fas fa-check text-primary"></i>
 					{/if}
 				</button>
@@ -105,7 +86,7 @@
 				<button
 					onclick={() => selectLanguage('es')}
 					class={`w-full flex items-center justify-between p-3 rounded-xl border transition ${
-						selectedLanguage === 'es' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
+						$currentLanguage === 'es' ? 'bg-primary/30 border-primary text-primary' : 'bg-white border-slate-200 text-slate-700'
 					}`}
 					aria-label={t('settings.selectSpanish')}
 				>
@@ -118,19 +99,10 @@
 							<p class="text-xs text-slate-500">{t('settings.spanishDescription')}</p>
 						</div>
 					</div>
-					{#if selectedLanguage === 'es'}
+					{#if $currentLanguage === 'es'}
 						<i class="fas fa-check text-primary"></i>
 					{/if}
 				</button>
-
-				{#if showSaveButton}
-					<button
-						onclick={saveLanguage}
-						class="w-full bg-primary text-white font-semibold py-3 rounded-xl hover:bg-primary/90 transition mt-4"
-					>
-						{t('settings.saveLanguage')}
-					</button>
-				{/if}
 			</div>
 		</div>
 
@@ -150,38 +122,6 @@
 					<span class="text-sm text-slate-600">{t('settings.developer')}</span>
 					<span class="text-sm font-semibold text-slate-800">ElMolda Software</span>
 				</div>
-			</div>
-		</div>
-
-		<!-- Support -->
-		<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-			<h3 class="text-sm font-bold text-slate-700 mb-4">{t('settings.supportFeedback')}</h3>
-			<div class="space-y-3">
-				<a href="mailto:support@gastrack.com" class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-primary transition">
-					<div class="flex items-center gap-3">
-						<div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-							<i class="fas fa-question-circle text-amber-500"></i>
-						</div>
-						<div>
-							<p class="font-semibold text-slate-700">{t('settings.helpSupport')}</p>
-							<p class="text-xs text-slate-500">{t('settings.helpSupportDescription')}</p>
-						</div>
-					</div>
-					<i class="fas fa-chevron-right text-slate-400"></i>
-				</a>
-
-				<a href="mailto:feedback@gastrack.com" class="flex items-center justify-between p-3 rounded-xl border border-slate-200 hover:border-primary transition">
-					<div class="flex items-center gap-3">
-						<div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-							<i class="fas fa-comment-dots text-emerald-500"></i>
-						</div>
-						<div>
-							<p class="font-semibold text-slate-700">{t('settings.sendFeedback')}</p>
-							<p class="text-xs text-slate-500">{t('settings.sendFeedbackDescription')}</p>
-						</div>
-					</div>
-					<i class="fas fa-chevron-right text-slate-400"></i>
-				</a>
 			</div>
 		</div>
 
