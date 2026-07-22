@@ -1,177 +1,184 @@
-import { supabase } from '../client';
-import type { Database } from '../supabase-types';
+import { and, desc, eq, ne } from 'drizzle-orm';
+import { db } from '$lib/db';
+import { cars, fuelLogs } from '$lib/db/schema';
+import type { Car } from '$lib/types';
 
-type Car = Database['public']['Tables']['cars']['Row'];
-type CarInsert = Database['public']['Tables']['cars']['Insert'];
-type CarUpdate = Database['public']['Tables']['cars']['Update'];
+export type CreateCarInput = {
+	brand: string;
+	model: string;
+	year: number;
+	licensePlate?: string | null;
+	pictureUrl?: string | null;
+	isDefault?: boolean;
+};
 
-// Get all cars for the current user
+export type UpdateCarInput = {
+	brand?: string;
+	model?: string;
+	year?: number;
+	licensePlate?: string | null;
+	pictureUrl?: string | null;
+	isDefault?: boolean;
+};
+
+function mapCar(row: typeof cars.$inferSelect): Car {
+	return {
+		id: row.id,
+		brand: row.brand,
+		model: row.model,
+		year: row.year,
+		licensePlate: row.licensePlate ?? undefined,
+		pictureUrl: row.pictureUrl ?? undefined,
+		createdAt: row.createdAt.toISOString(),
+		isDefault: row.isDefault
+	};
+}
+
+/** All cars for a user, newest first. */
 export async function getUserCars(userId: string): Promise<Car[]> {
-	const { data, error } = await supabase
-		.from('cars')
-		.select('*')
-		.eq('user_id', userId)
-		.order('created_at', { ascending: false });
-
-	if (error) {
-		console.error('Error fetching user cars:', error);
-		throw error;
-	}
-
-	return data || [];
+	const rows = await db
+		.select()
+		.from(cars)
+		.where(eq(cars.userId, userId))
+		.orderBy(desc(cars.createdAt));
+	return rows.map(mapCar);
 }
 
-// Get a single car by ID
-export async function getCarById(carId: string): Promise<Car | null> {
-	const { data, error } = await supabase
-		.from('cars')
-		.select('*')
-		.eq('id', carId)
-		.single();
-
-	if (error) {
-		console.error('Error fetching car:', error);
-		return null;
-	}
-
-	return data;
+/** Single car owned by the user, or null. */
+export async function getCarById(userId: string, carId: string): Promise<Car | null> {
+	const [row] = await db
+		.select()
+		.from(cars)
+		.where(and(eq(cars.id, carId), eq(cars.userId, userId)))
+		.limit(1);
+	return row ? mapCar(row) : null;
 }
 
-// Get user's default car
+/** Default car, or first car if none marked default. */
 export async function getDefaultCar(userId: string): Promise<Car | null> {
-	const { data, error } = await supabase
-		.from('cars')
-		.select('*')
-		.eq('user_id', userId)
-		.eq('is_default', true)
-		.limit(1)
-		.single();
+	const [defaultRow] = await db
+		.select()
+		.from(cars)
+		.where(and(eq(cars.userId, userId), eq(cars.isDefault, true)))
+		.limit(1);
 
-	if (error) {
-		// If no default car, get the first car
-		const { data: cars } = await supabase
-			.from('cars')
-			.select('*')
-			.eq('user_id', userId)
-			.limit(1)
-			.single();
+	if (defaultRow) return mapCar(defaultRow);
 
-		return cars;
-	}
+	const [first] = await db
+		.select()
+		.from(cars)
+		.where(eq(cars.userId, userId))
+		.orderBy(desc(cars.createdAt))
+		.limit(1);
 
-	return data;
+	return first ? mapCar(first) : null;
 }
 
-// Create a new car
-export async function createCar(carData: CarInsert): Promise<Car> {
-	// If this car is set as default, unset other defaults
-	if (carData.is_default) {
-		const { error: clearDefaultsError } = await supabase
-			.from('cars')
-			.update({ is_default: false })
-			.eq('user_id', carData.user_id);
+async function clearDefaults(userId: string, exceptCarId?: string) {
+	const where = exceptCarId
+		? and(eq(cars.userId, userId), ne(cars.id, exceptCarId))
+		: eq(cars.userId, userId);
 
-		if (clearDefaultsError) {
-			console.error('Error clearing default car:', clearDefaultsError);
-			throw clearDefaultsError;
+	await db
+		.update(cars)
+		.set({ isDefault: false, updatedAt: new Date() })
+		.where(where);
+}
+
+/** Create a car. Enforces single-default when `isDefault` is true. */
+export async function createCar(userId: string, input: CreateCarInput): Promise<Car> {
+	const isDefault = input.isDefault ?? false;
+
+	if (isDefault) {
+		await clearDefaults(userId);
+	}
+
+	const [row] = await db
+		.insert(cars)
+		.values({
+			userId,
+			brand: input.brand,
+			model: input.model,
+			year: input.year,
+			licensePlate: input.licensePlate ?? null,
+			pictureUrl: input.pictureUrl ?? null,
+			isDefault
+		})
+		.returning();
+
+	return mapCar(row);
+}
+
+/**
+ * Update a car owned by the user.
+ * Throws if the car does not exist or is not owned by `userId`.
+ */
+export async function updateCar(
+	userId: string,
+	carId: string,
+	updates: UpdateCarInput
+): Promise<Car> {
+	const existing = await getCarById(userId, carId);
+	if (!existing) {
+		throw new Error('Car not found');
+	}
+
+	if (updates.isDefault === true) {
+		await clearDefaults(userId, carId);
+	}
+
+	const [row] = await db
+		.update(cars)
+		.set({
+			...(updates.brand !== undefined ? { brand: updates.brand } : {}),
+			...(updates.model !== undefined ? { model: updates.model } : {}),
+			...(updates.year !== undefined ? { year: updates.year } : {}),
+			...(updates.licensePlate !== undefined ? { licensePlate: updates.licensePlate } : {}),
+			...(updates.pictureUrl !== undefined ? { pictureUrl: updates.pictureUrl } : {}),
+			...(updates.isDefault !== undefined ? { isDefault: updates.isDefault } : {}),
+			updatedAt: new Date()
+		})
+		.where(and(eq(cars.id, carId), eq(cars.userId, userId)))
+		.returning();
+
+	if (!row) {
+		throw new Error('Car not found');
+	}
+
+	return mapCar(row);
+}
+
+/**
+ * Delete a car owned by the user.
+ * Fuel logs cascade via FK. If it was default, promotes another car.
+ */
+export async function deleteCar(userId: string, carId: string): Promise<void> {
+	const existing = await getCarById(userId, carId);
+	if (!existing) {
+		throw new Error('Car not found');
+	}
+
+	await db.delete(cars).where(and(eq(cars.id, carId), eq(cars.userId, userId)));
+
+	if (existing.isDefault) {
+		const [next] = await db
+			.select()
+			.from(cars)
+			.where(eq(cars.userId, userId))
+			.orderBy(desc(cars.createdAt))
+			.limit(1);
+
+		if (next) {
+			await db
+				.update(cars)
+				.set({ isDefault: true, updatedAt: new Date() })
+				.where(and(eq(cars.id, next.id), eq(cars.userId, userId)));
 		}
 	}
-
-	const { data, error } = await supabase
-		.from('cars')
-		.insert(carData)
-		.select()
-		.single();
-
-	if (error) {
-		console.error('Error creating car:', error);
-		throw error;
-	}
-
-	return data;
 }
 
-// Update a car
-export async function updateCar(carId: string, updates: CarUpdate): Promise<Car> {
-	// If setting as default, unset other defaults
-	if (updates.is_default) {
-		const { data: car } = await supabase
-			.from('cars')
-			.select('user_id')
-			.eq('id', carId)
-			.single();
-
-		if (car) {
-			const { error: clearDefaultsError } = await supabase
-				.from('cars')
-				.update({ is_default: false })
-				.eq('user_id', car.user_id)
-				.neq('id', carId);
-
-			if (clearDefaultsError) {
-				console.error('Error clearing default car:', clearDefaultsError);
-				throw clearDefaultsError;
-			}
-		}
-	}
-
-	const { data, error } = await supabase
-		.from('cars')
-		.update(updates)
-		.eq('id', carId)
-		.select()
-		.single();
-
-	if (error) {
-		console.error('Error updating car:', error);
-		throw error;
-	}
-
-	return data;
-}
-
-// Delete a car and its associated fuel logs
-export async function deleteCar(carId: string): Promise<void> {
-	const { error: logsError } = await supabase
-		.from('fuel_logs')
-		.delete()
-		.eq('car_id', carId);
-
-	if (logsError) {
-		console.error('Error deleting car fuel logs:', logsError);
-		throw logsError;
-	}
-
-	const { error } = await supabase
-		.from('cars')
-		.delete()
-		.eq('id', carId);
-
-	if (error) {
-		console.error('Error deleting car:', error);
-		throw error;
-	}
-}
-
-// Delete all cars and fuel logs for a user (keeps the account)
+/** Delete all cars and fuel logs for a user (keeps the account). */
 export async function resetUserData(userId: string): Promise<void> {
-	const { error: logsError } = await supabase
-		.from('fuel_logs')
-		.delete()
-		.eq('user_id', userId);
-
-	if (logsError) {
-		console.error('Error deleting user fuel logs:', logsError);
-		throw logsError;
-	}
-
-	const { error: carsError } = await supabase
-		.from('cars')
-		.delete()
-		.eq('user_id', userId);
-
-	if (carsError) {
-		console.error('Error deleting user cars:', carsError);
-		throw carsError;
-	}
+	await db.delete(fuelLogs).where(eq(fuelLogs.userId, userId));
+	await db.delete(cars).where(eq(cars.userId, userId));
 }

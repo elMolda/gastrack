@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
-	import { supabase } from '$lib/db/client';
-	import { deleteCar, updateCar } from '$lib/db/queries/cars';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
-	import type { Database } from '$lib/db/supabase-types';
+	import type { Car } from '$lib/types';
 
-	type DbCar = Database['public']['Tables']['cars']['Row'];
-
-	const { data } = $props<{ data: { cars: DbCar[] } }>();
+	const { data, form } = $props<{ data: { cars: Car[] }; form?: { error?: string } }>();
 
 	let cars = $state([...data.cars]);
 	let openMenuId = $state<string | null>(null);
-	let carToDelete = $state<DbCar | null>(null);
+	let carToDelete = $state<Car | null>(null);
 	let deleting = $state(false);
-	let errorMessage = $state('');
+
+	$effect(() => {
+		cars = [...data.cars];
+	});
 
 	function toggleMenu(carId: string) {
 		openMenuId = openMenuId === carId ? null : carId;
@@ -24,50 +24,13 @@
 		openMenuId = null;
 	}
 
-	function confirmDelete(car: DbCar) {
+	function confirmDelete(car: Car) {
 		carToDelete = car;
 		closeMenu();
 	}
 
 	function cancelDelete() {
 		carToDelete = null;
-	}
-
-	async function handleDelete() {
-		if (!carToDelete) return;
-
-		deleting = true;
-		errorMessage = '';
-
-		try {
-			const { data: { user } } = await supabase.auth.getUser();
-			if (!user) {
-				goto('/auth/login');
-				return;
-			}
-
-			const remaining = cars.filter((c) => c.id !== carToDelete!.id);
-
-			if (carToDelete.is_default && remaining.length > 0) {
-				await updateCar(remaining[0].id, { is_default: true });
-			}
-
-			await deleteCar(carToDelete.id);
-
-			if (remaining.length === 0) {
-				goto('/auth/car-setup');
-				return;
-			}
-
-			cars = remaining;
-			carToDelete = null;
-			await invalidateAll();
-		} catch (err) {
-			console.error('Error deleting car:', err);
-			errorMessage = t('cars.deleteFailed');
-		} finally {
-			deleting = false;
-		}
 	}
 </script>
 
@@ -92,8 +55,8 @@
 			{t('cars.addCar')}
 		</a>
 
-		{#if errorMessage}
-			<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg">{errorMessage}</div>
+		{#if form?.error}
+			<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg">{t('cars.deleteFailed')}</div>
 		{/if}
 
 		{#if cars.length === 0}
@@ -115,8 +78,8 @@
 								</div>
 								<div>
 									<h3 class="font-bold text-slate-800">{car.brand} {car.model}</h3>
-									<p class="text-sm text-slate-500">{car.year} • {car.license_plate || t('cars.noPlate')}</p>
-									{#if car.is_default}
+									<p class="text-sm text-slate-500">{car.year} • {car.licensePlate || t('cars.noPlate')}</p>
+									{#if car.isDefault}
 										<span class="inline-block mt-1 text-xs font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded-full">
 											{t('cars.defaultVehicle')}
 										</span>
@@ -182,13 +145,31 @@
 				>
 					{t('common.cancel')}
 				</button>
-				<button
-					onclick={handleDelete}
-					disabled={deleting}
-					class="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+				<form
+					method="POST"
+					action="?/delete"
+					class="flex-1"
+					use:enhance={() => {
+						deleting = true;
+						return async ({ result, update }) => {
+							await update();
+							deleting = false;
+							if (result.type === 'success' || result.type === 'redirect') {
+								carToDelete = null;
+								await invalidateAll();
+							}
+						};
+					}}
 				>
-					{deleting ? t('cars.deleting') : t('common.delete')}
-				</button>
+					<input type="hidden" name="carId" value={carToDelete.id} />
+					<button
+						type="submit"
+						disabled={deleting}
+						class="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+					>
+						{deleting ? t('cars.deleting') : t('common.delete')}
+					</button>
+				</form>
 			</div>
 		</div>
 	</div>
