@@ -60,9 +60,27 @@ export async function upsertDomainUser(authUser: {
 }
 
 function createAuth() {
+	const primaryUrl = requirePrivateEnv('BETTER_AUTH_URL');
+
 	return betterAuth({
-		baseURL: requirePrivateEnv('BETTER_AUTH_URL'),
+		// Multi-host: custom domain + Pages preview/production *.pages.dev
+		baseURL: {
+			allowedHosts: [
+				'gastrack.elmoldasoft.us',
+				'gastrack-brc.pages.dev',
+				'*.gastrack-brc.pages.dev',
+				'localhost:*'
+			],
+			fallback: primaryUrl
+		},
 		secret: requirePrivateEnv('BETTER_AUTH_SECRET'),
+		trustedOrigins: [
+			'https://gastrack.elmoldasoft.us',
+			'https://gastrack-brc.pages.dev',
+			'https://*.gastrack-brc.pages.dev',
+			'http://localhost:5173',
+			'http://localhost:8788'
+		],
 		database: drizzleAdapter(db, {
 			provider: 'pg',
 			schema: {
