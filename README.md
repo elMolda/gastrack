@@ -2,81 +2,64 @@
 
 SvelteKit application for tracking vehicles and fuel consumption.
 
-## Local development
+## Environment files
 
-Local development runs entirely in Docker. It includes the app, PostgreSQL,
-Supabase Auth, PostgREST, Realtime, and Kong. Do not run `npm run dev` on the
-host: the Compose stack deliberately points the app at its own local Supabase
-services instead of the production project.
-
-Requirements:
-
-- Docker Desktop with Docker Compose
-- Ports `5173`, `8000`, and `54322` available on localhost
-
-Start the stack:
+| File | Used by |
+|---|---|
+| `.env.local` | Local Docker Compose stack |
+| `.env.production` | Cloudflare Pages (paste vars there — not used by Docker) |
 
 ```sh
-docker compose up --build
+cp .env.local.example .env.local
+cp .env.production.example .env.production
+# fill secrets into both files
 ```
 
-Open the app at <http://localhost:5173>. Source files are bind-mounted, so
-SvelteKit reloads when they change.
-
-Run it in the background:
+## Local development (Docker only)
 
 ```sh
-docker compose up -d --build
-docker compose logs -f app
+docker compose -f docker-compose.local.yml up --build
 ```
 
-Stop the stack while retaining local data:
+This starts Postgres, applies Drizzle migrations, then the Vite dev server.
+Open <http://localhost:5173>. Source is bind-mounted (hot reload).
 
 ```sh
-docker compose down
+# background
+docker compose -f docker-compose.local.yml up -d --build
+docker compose -f docker-compose.local.yml logs -f app
+
+# stop (keep data)
+docker compose -f docker-compose.local.yml down
+
+# stop + wipe local DB
+docker compose -f docker-compose.local.yml down -v
 ```
 
-## Database migrations
-
-SQL migrations live in `supabase/migrations`. On every Compose startup, the
-one-shot `migrations` service applies all pending migrations before the API and
-app start.
-
-Add a migration using a UTC timestamp:
-
-```text
-supabase/migrations/YYYYMMDDHHMMSS_description.sql
-```
-
-Apply it by rebuilding and starting the stack:
+### Useful one-offs
 
 ```sh
-docker compose up --build
+docker compose -f docker-compose.local.yml exec app npm run check
+docker compose -f docker-compose.local.yml exec app npm run db:generate
+docker compose -f docker-compose.local.yml exec app npm run db:migrate
 ```
 
-The migration runner connects only to the Compose database hostname (`db`) and
-uses deterministic local credentials. It cannot target the production
-Supabase project.
+Postgres is also on `localhost:5433` (user/password/db: `gastrack`) for inspection.
 
-## Reset local data
+## Production
 
-This permanently removes only the Docker-managed local database and then
-recreates it from all migrations:
+Deploy on Cloudflare Pages. Set the keys from `.env.production` in the Pages
+project environment. Run migrations against Neon once:
 
 ```sh
-docker compose down -v
-docker compose up --build
+docker compose -f docker-compose.local.yml run --rm \
+  -e DATABASE_URL="$DATABASE_URL" \
+  app npm run db:migrate
 ```
 
-The local database is also exposed at `localhost:54322` for inspection. Its
-development-only credentials are in `docker-compose.yml`; they must never be
-reused in a deployed environment.
+(or point any machine with the repo + Node at the Neon `DATABASE_URL`).
 
-## Project checks
+## Legacy Supabase stack
 
-Run checks inside the app container:
-
-```sh
-docker compose exec app npm run check
-docker compose exec app npm run build
-```
+`docker compose up` (default `docker-compose.yml`) is the old Supabase-based
+local stack. Prefer `docker-compose.local.yml` on the migration branch.
