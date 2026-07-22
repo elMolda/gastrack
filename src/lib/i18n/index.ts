@@ -36,6 +36,8 @@ const translations = {
 		// Cars
 		cars: {
 			addCar: 'Add Your Vehicle',
+			addCarComingSoon: 'Add vehicle (coming soon)',
+			addCarComingSoonHint: 'Multi-car logging & dashboard filter are next — adding another vehicle is temporarily disabled.',
 			editCar: 'Edit Vehicle',
 			brand: 'Brand',
 			model: 'Model',
@@ -205,6 +207,8 @@ const translations = {
 		// Cars
 		cars: {
 			addCar: 'Agregar Vehículo',
+			addCarComingSoon: 'Agregar vehículo (próximamente)',
+			addCarComingSoonHint: 'Selección de vehículo en logs y dashboard viene pronto — agregar otro vehículo está deshabilitado por ahora.',
 			editCar: 'Editar Vehículo',
 			brand: 'Marca',
 			model: 'Modelo',
