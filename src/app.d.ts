@@ -14,6 +14,14 @@ declare global {
 			stats?: DashboardStats;
 			cars?: any[];
 		}
+		// Cloudflare Pages / Workers platform bindings (populated by adapter-cloudflare).
+		interface Platform {
+			env: Record<string, string>;
+			context: {
+				waitUntil(promise: Promise<unknown>): void;
+			};
+			caches: CacheStorage;
+		}
 	}
 }
 

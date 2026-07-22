@@ -15,8 +15,7 @@
 		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-auto": "^7.0.1",
-		"@sveltejs/adapter-vercel": "^6.3.4",
+		"@sveltejs/adapter-cloudflare": "^7.2.9",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@tailwindcss/forms": "^0.5.11",
@@ -24,7 +23,6 @@
 		"@tailwindcss/vite": "^4.3.0",
 		"dotenv": "^17.4.2",
 		"drizzle-kit": "^0.31.10",
-		"supabase": "^2.109.1",
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.3.0",
@@ -34,8 +32,6 @@
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^7.3.1",
 		"@neondatabase/serverless": "^1.1.0",
-		"@supabase/ssr": "^0.12.3",
-		"@supabase/supabase-js": "^2.110.7",
 		"better-auth": "^1.6.23",
 		"drizzle-orm": "^0.45.2",
 		"lucide-svelte": "^1.0.1",
