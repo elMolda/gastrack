@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
+	import appleTouchIcon from '$lib/assets/apple-touch-icon.png';
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
 	import { onMount } from 'svelte';
 
@@ -22,7 +23,10 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<title>GasTrack</title>
+	<meta name="description" content="Fuel tracking and analytics for your vehicles." />
+	<link rel="icon" type="image/png" href={favicon} />
+	<link rel="apple-touch-icon" href={appleTouchIcon} />
 	<!-- Font Awesome -->
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 	<!-- Custom styles from prototype -->
