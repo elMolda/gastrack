@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
+	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import type { FuelLog, DashboardStats } from '$lib/types';
 	import EfficiencyChart from '$lib/components/dashboard/EfficiencyChart.svelte';
 	import PerformanceByCondition from '$lib/components/dashboard/PerformanceByCondition.svelte';
@@ -13,6 +15,24 @@
 			cars: any[];
 		};
 	}>();
+
+	// Soft refresh: re-run loaders without a full page reload.
+	// Interval + focus covers the old Supabase Realtime use case for a single-user tracker.
+	onMount(() => {
+		const id = setInterval(() => {
+			void invalidateAll();
+		}, 15_000);
+
+		const onFocus = () => {
+			void invalidateAll();
+		};
+		window.addEventListener('focus', onFocus);
+
+		return () => {
+			clearInterval(id);
+			window.removeEventListener('focus', onFocus);
+		};
+	});
 </script>
 
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
