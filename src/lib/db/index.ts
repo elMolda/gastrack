@@ -10,6 +10,9 @@ import * as schema from './schema';
  *
  * - Neon (`*.neon.tech`): HTTP driver — required on Cloudflare Pages (edge).
  * - Local Docker Postgres: TCP via postgres.js (Neon HTTP cannot speak plain Postgres).
+ *
+ * Lazy so `vite build` on Cloudflare succeeds without DATABASE_URL at build time;
+ * the URL is read from Pages/Workers env bindings at request time.
  */
 function createDb() {
 	const url = env.DATABASE_URL;
@@ -24,6 +27,17 @@ function createDb() {
 	return drizzlePostgres(postgres(url, { prepare: false }), { schema });
 }
 
-export const db = createDb();
-export type Database = typeof db;
+type Database = ReturnType<typeof createDb>;
+
+let _db: Database | undefined;
+
+export const db: Database = new Proxy({} as Database, {
+	get(_target, prop, receiver) {
+		if (!_db) _db = createDb();
+		const value = Reflect.get(_db as object, prop, receiver);
+		return typeof value === 'function' ? value.bind(_db) : value;
+	}
+});
+
+export type { Database };
 export * from './schema';
