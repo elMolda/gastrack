@@ -1,0 +1,16 @@
+project_id = "gastrack-local"
+
+[db]
+major_version = 15
+
+[db.migrations]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/**"]
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false

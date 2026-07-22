@@ -1,11 +1,12 @@
-import { createServerSupabase } from '$lib/db/client';
+import { createServerSupabase } from '$lib/db/server';
 import { redirect, type Handle } from '@sveltejs/kit';
 
 // Public routes that don't require authentication
 const publicRoutes = [
 	'/auth/login',
 	'/auth/register',
-	'/auth/car-setup'
+	'/auth/car-setup',
+	'/privacy'
 ];
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -24,9 +25,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 		throw redirect(303, '/auth/login');
 	}
 
-	if (session && isPublicRoute && event.url.pathname !== '/auth/car-setup') {
+	// Public routes that authenticated users are still allowed to view directly
+	const alwaysAccessible = ['/auth/car-setup', '/privacy'];
+	const isAlwaysAccessible = alwaysAccessible.some(route => event.url.pathname.startsWith(route));
+
+	if (session && isPublicRoute && !isAlwaysAccessible) {
 		// If user is logged in and tries to access login/register, redirect to dashboard
-		// But allow car-setup even if logged in (for new users)
 		throw redirect(303, '/');
 	}
 

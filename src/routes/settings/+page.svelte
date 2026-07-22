@@ -176,7 +176,7 @@
 				</div>
 				<div class="flex justify-between items-center py-2">
 					<span class="text-sm text-slate-600">{t('settings.developer')}</span>
-					<span class="text-sm font-semibold text-slate-800">GasTrack Team</span>
+					<span class="text-sm font-semibold text-slate-800">ElMolda Software</span>
 				</div>
 			</div>
 		</div>

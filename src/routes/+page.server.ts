@@ -1,4 +1,4 @@
-import { createServerSupabaseFromCookies } from '$lib/db/client';
+import { createServerSupabaseFromCookies } from '$lib/db/server';
 import { calculateDashboardStats } from '$lib/types';
 import type { FuelLog } from '$lib/types';
 import { error, redirect } from '@sveltejs/kit';
