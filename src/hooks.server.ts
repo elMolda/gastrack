@@ -6,12 +6,20 @@ const publicRoutes = [
 	'/auth/register',
 	'/auth/car-setup',
 	'/privacy',
-	'/api/auth'
+	'/api/auth',
+	'/api/health'
 ];
 
-const alwaysAccessible = ['/auth/car-setup', '/privacy', '/api/auth'];
+const alwaysAccessible = ['/auth/car-setup', '/privacy', '/api/auth', '/api/health'];
 
 export const handle: Handle = async ({ event, resolve }) => {
+	const path = event.url.pathname;
+
+	// Health must not depend on auth/DB — used to diagnose deploy env misconfig.
+	if (path === '/api/health' || path.startsWith('/api/health/')) {
+		return resolve(event);
+	}
+
 	let user: AppUser | null = null;
 	try {
 		user = await getSessionUser(event);
@@ -24,7 +32,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Keep `session` as a thin compatibility shape for loaders not yet ported.
 	event.locals.session = user ? { user: { id: user.id, email: user.email } } : null;
 
-	const path = event.url.pathname;
 	const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
 	const isAlwaysAccessible = alwaysAccessible.some((route) => path.startsWith(route));
 
