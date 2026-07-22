@@ -9,7 +9,7 @@ const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
 	throw new Error(
 		'DATABASE_URL is required for drizzle-kit.\n' +
-			'  Local (Docker): docker compose -f docker-compose.local.yml up --build\n' +
+			'  Local (Docker): docker compose up --build\n' +
 			'  Or set DATABASE_URL in .env.local'
 	);
 }
