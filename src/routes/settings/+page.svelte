@@ -1,28 +1,24 @@
 <script lang="ts">
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
 	import { authClient } from '$lib/auth-client';
+	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
+
+	let { data, form } = $props();
 
 	let selectedLanguage = $state<'en' | 'es'>('en');
 	let currentLang = $state<'en' | 'es'>('en');
 	let showSaveButton = $state(false);
-	let userEmail = $state('');
+	let userEmail = $state(data.email ?? '');
 	let showResetConfirm = $state(false);
 	let resetting = $state(false);
-	let resetError = $state('');
 
 	// Initialize with current language
 	currentLanguage.subscribe((lang) => {
 		currentLang = lang;
 		selectedLanguage = lang;
 	})();
-
-	onMount(async () => {
-		const { data } = await authClient.getSession();
-		userEmail = data?.user?.email ?? '';
-	});
 
 	// Handle language selection
 	function selectLanguage(lang: 'en' | 'es') {
@@ -41,26 +37,6 @@
 	async function handleLogout() {
 		await authClient.signOut();
 		goto('/auth/login');
-	}
-
-	async function handleResetData() {
-		resetting = true;
-		resetError = '';
-
-		try {
-			const res = await fetch('/api/reset-data', { method: 'POST' });
-			if (!res.ok) {
-				resetError = t('settings.resetFailed');
-				return;
-			}
-			showResetConfirm = false;
-			goto('/auth/car-setup');
-		} catch (err) {
-			console.error('Error resetting data:', err);
-			resetError = t('settings.resetFailed');
-		} finally {
-			resetting = false;
-		}
 	}
 </script>
 
@@ -212,8 +188,8 @@
 		<!-- Reset Data (Danger Zone) -->
 		<div class="bg-white rounded-2xl p-4 shadow-sm border border-red-100">
 			<h3 class="text-sm font-bold text-red-700 mb-4">{t('settings.dangerZone')}</h3>
-			{#if resetError}
-				<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg mb-3">{resetError}</div>
+			{#if form?.error}
+				<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg mb-3">{t('settings.resetFailed')}</div>
 			{/if}
 			<button
 				onclick={() => showResetConfirm = true}
@@ -243,13 +219,26 @@
 				>
 					{t('common.cancel')}
 				</button>
-				<button
-					onclick={handleResetData}
-					disabled={resetting}
-					class="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+				<form
+					method="POST"
+					action="?/reset"
+					class="flex-1"
+					use:enhance={() => {
+						resetting = true;
+						return async ({ update }) => {
+							await update();
+							resetting = false;
+						};
+					}}
 				>
-					{resetting ? t('settings.resetting') : t('common.delete')}
-				</button>
+					<button
+						type="submit"
+						disabled={resetting}
+						class="w-full py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition disabled:opacity-50"
+					>
+						{resetting ? t('settings.resetting') : t('common.delete')}
+					</button>
+				</form>
 			</div>
 		</div>
 	</div>
