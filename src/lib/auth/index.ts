@@ -1,7 +1,6 @@
 import { redirect, type RequestEvent } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
-import { db } from '$lib/db';
-import { cars, users } from '$lib/db/schema';
+import { users } from '$lib/db/schema';
+import { getUserCars } from '$lib/db/queries/cars';
 import { auth, upsertDomainUser } from './provider';
 
 export type AppUser = {
@@ -42,12 +41,8 @@ export async function requireUser(event: RequestEvent): Promise<AppUser> {
 }
 
 export async function userHasCars(userId: string): Promise<boolean> {
-	const rows = await db
-		.select({ id: cars.id })
-		.from(cars)
-		.where(eq(cars.userId, userId))
-		.limit(1);
-	return rows.length > 0;
+	const list = await getUserCars(userId);
+	return list.length > 0;
 }
 
 /** Re-export only what the API route needs to mount the handler. */
