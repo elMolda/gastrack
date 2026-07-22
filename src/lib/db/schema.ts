@@ -11,10 +11,19 @@ import {
 	uuid
 } from 'drizzle-orm/pg-core';
 
+export {
+	user,
+	session,
+	account,
+	verification,
+	userRelations,
+	sessionRelations,
+	accountRelations
+} from './auth-schema';
+
 /**
  * Owned domain identity. Not FK'd to Better Auth's `user` table —
  * `auth_subject` maps the provider id so we can swap auth later.
- * Better Auth tables (user/session/account/verification) land in Migration 2.
  */
 export const users = pgTable(
 	'users',

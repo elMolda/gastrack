@@ -1,24 +1,31 @@
-import { createServerSupabaseFromCookies } from '$lib/db/server';
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
+import { desc, eq } from 'drizzle-orm';
+import { db } from '$lib/db';
+import { cars } from '$lib/db/schema';
+import type { PageServerLoad } from './$types';
 
-export async function load({ locals, cookies }: { locals: App.Locals; cookies: { get: (key: string) => string | undefined } }) {
-	const session = locals.session;
-	if (!session) {
+export const load: PageServerLoad = async ({ locals }) => {
+	const user = locals.user;
+	if (!user) {
 		throw redirect(303, '/auth/login');
 	}
 
-	const supabase = createServerSupabaseFromCookies(cookies);
+	const rows = await db
+		.select()
+		.from(cars)
+		.where(eq(cars.userId, user.id))
+		.orderBy(desc(cars.createdAt));
 
-	const { data: cars, error: carsError } = await supabase
-		.from('cars')
-		.select('*')
-		.eq('user_id', session.user.id)
-		.order('created_at', { ascending: false });
-
-	if (carsError) {
-		console.error('Error fetching cars:', carsError);
-		throw error(500, 'Failed to load vehicles');
-	}
-
-	return { cars: cars || [] };
-}
+	return {
+		cars: rows.map((car) => ({
+			id: car.id,
+			brand: car.brand,
+			model: car.model,
+			year: car.year,
+			license_plate: car.licensePlate,
+			picture_url: car.pictureUrl,
+			is_default: car.isDefault,
+			created_at: car.createdAt.toISOString()
+		}))
+	};
+};

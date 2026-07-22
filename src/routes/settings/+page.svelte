@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
-	import { supabase } from '$lib/db/client';
-	import { resetUserData } from '$lib/db/queries/cars';
+	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import Navbar from '$lib/components/ui/Navbar.svelte';
 
 	let selectedLanguage = $state<'en' | 'es'>('en');
@@ -19,11 +19,9 @@
 		selectedLanguage = lang;
 	})();
 
-	// Get current user
-	supabase.auth.getUser().then(({ data: { user } }) => {
-		if (user) {
-			userEmail = user.email || '';
-		}
+	onMount(async () => {
+		const { data } = await authClient.getSession();
+		userEmail = data?.user?.email ?? '';
 	});
 
 	// Handle language selection
@@ -41,7 +39,7 @@
 
 	// Handle logout
 	async function handleLogout() {
-		await supabase.auth.signOut();
+		await authClient.signOut();
 		goto('/auth/login');
 	}
 
@@ -50,13 +48,11 @@
 		resetError = '';
 
 		try {
-			const { data: { user } } = await supabase.auth.getUser();
-			if (!user) {
-				goto('/auth/login');
+			const res = await fetch('/api/reset-data', { method: 'POST' });
+			if (!res.ok) {
+				resetError = t('settings.resetFailed');
 				return;
 			}
-
-			await resetUserData(user.id);
 			showResetConfirm = false;
 			goto('/auth/car-setup');
 		} catch (err) {

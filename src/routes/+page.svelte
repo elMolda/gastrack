@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { t } from '$lib/i18n';
 	import type { FuelLog, DashboardStats } from '$lib/types';
-	import { supabase } from '$lib/db/client';
-	import { onMount } from 'svelte';
 	import EfficiencyChart from '$lib/components/dashboard/EfficiencyChart.svelte';
 	import PerformanceByCondition from '$lib/components/dashboard/PerformanceByCondition.svelte';
 	import HistoryLog from '$lib/components/dashboard/HistoryLog.svelte';
@@ -15,44 +13,6 @@
 			cars: any[];
 		};
 	}>();
-
-	onMount(() => {
-		const channel = supabase
-			.channel('fuel-logs-changes')
-			.on(
-				'postgres_changes',
-				{
-					event: 'INSERT',
-					schema: 'public',
-					table: 'fuel_logs'
-				},
-				async (payload) => {
-					const { data: { user } } = await supabase.auth.getUser();
-					if (user && payload.new.user_id === user.id) {
-						window.location.reload();
-					}
-				}
-			)
-			.on(
-				'postgres_changes',
-				{
-					event: 'DELETE',
-					schema: 'public',
-					table: 'fuel_logs'
-				},
-				async (payload) => {
-					const { data: { user } } = await supabase.auth.getUser();
-					if (user && payload.old.user_id === user.id) {
-						window.location.reload();
-					}
-				}
-			)
-			.subscribe();
-
-		return () => {
-			supabase.removeChannel(channel);
-		};
-	});
 </script>
 
 <div class="max-w-md mx-auto bg-slate-50 min-h-screen shadow-xl relative pb-28">
