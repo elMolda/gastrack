@@ -3,7 +3,6 @@
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
 
-	let username = $state('');
 	let email = $state('');
 	let password = $state('');
 	let loading = $state(false);
@@ -15,10 +14,11 @@
 		error = '';
 
 		try {
+			// Better Auth requires `name`; use email local-part. Domain `users.username` stays optional/null.
 			const { error: authError } = await authClient.signUp.email({
 				email,
 				password,
-				name: username
+				name: email.split('@')[0] || email
 			});
 
 			if (authError) {
@@ -57,18 +57,6 @@
 		<h1 class="text-2xl font-bold text-dark">{t('auth.createAccount')}</h1>
 
 		<form onsubmit={handleRegister} class="space-y-4">
-			<div class="space-y-1.5">
-				<label for="username" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.username')}</label>
-				<input
-					id="username"
-					type="text"
-					placeholder={t('auth.usernamePlaceholder')}
-					bind:value={username}
-					required
-					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm"
-				/>
-			</div>
-
 			<div class="space-y-1.5">
 				<label for="email" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.email')}</label>
 				<input

@@ -3,22 +3,12 @@
 	import favicon from '$lib/assets/favicon.png';
 	import appleTouchIcon from '$lib/assets/apple-touch-icon.png';
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
-	import { onMount } from 'svelte';
 
 	let { children } = $props();
-	let language = $state<'en' | 'es'>('en');
-
-	onMount(() => {
-		// Subscribe to language changes
-		const unsubscribe = currentLanguage.subscribe((lang) => {
-			language = lang;
-		});
-		return unsubscribe;
-	});
 
 	function toggleLanguage() {
-		const newLang = language === 'en' ? 'es' : 'en';
-		setLanguage(newLang);
+		const next = $currentLanguage === 'en' ? 'es' : 'en';
+		setLanguage(next);
 	}
 </script>
 
@@ -56,12 +46,14 @@
 		<button
 			onclick={toggleLanguage}
 			class="flex items-center gap-2 px-3 py-2 bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200 shadow-sm hover:bg-white transition"
-			title={language === 'en' ? t('layout.switchToSpanish') : t('layout.switchToEnglish')}
+			title={$currentLanguage === 'en' ? t('layout.switchToSpanish') : t('layout.switchToEnglish')}
 		>
-			<i class={`fas fa-globe ${language === 'en' ? 'text-blue-500' : 'text-green-500'}`}></i>
-			<span class="text-sm font-medium text-slate-700">{language === 'en' ? 'ES' : 'EN'}</span>
+			<i class={`fas fa-globe ${$currentLanguage === 'en' ? 'text-blue-500' : 'text-green-500'}`}></i>
+			<span class="text-sm font-medium text-slate-700">{$currentLanguage === 'en' ? 'ES' : 'EN'}</span>
 		</button>
 	</div>
 
-	{@render children()}
+	{#key $currentLanguage}
+		{@render children()}
+	{/key}
 </div>

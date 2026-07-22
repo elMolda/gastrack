@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 export type Language = 'en' | 'es';
 export type TranslationKey = string;
@@ -346,39 +346,43 @@ const translations = {
 	}
 } as const;
 
-// Language store
-const storedLang = browser ? localStorage.getItem('language') as Language : 'en';
-const defaultLang: Language = storedLang && (storedLang === 'en' || storedLang === 'es') ? storedLang : 'en';
+// Language store — prefer saved choice, else browser locale, else English.
+function detectBrowserLanguage(): Language {
+	if (!browser) return 'en';
+	const candidates = [...(navigator.languages ?? []), navigator.language];
+	for (const tag of candidates) {
+		const code = tag?.toLowerCase().split('-')[0];
+		if (code === 'es') return 'es';
+		if (code === 'en') return 'en';
+	}
+	return 'en';
+}
+
+const storedLang = browser ? localStorage.getItem('language') : null;
+const defaultLang: Language =
+	storedLang === 'en' || storedLang === 'es' ? storedLang : detectBrowserLanguage();
 
 export const currentLanguage = writable<Language>(defaultLang);
 
-// Translation function
+// Translation function — reads current language via get() so callers stay simple.
+// Components remount/re-render when language changes via `{#key $currentLanguage}`.
 export function t(key: string, params: Record<string, string> = {}): string {
-	let translation: any = translations;
-	const keys = key.split('.');
-	
-	// Get current language value
-	let currentLang: Language = 'en';
-	currentLanguage.subscribe(value => { currentLang = value; })();
-	
-	// Navigate through translation object
-	// Start with the language-specific translations
-	translation = translation[currentLang];
-	
-	for (const k of keys) {
-		translation = translation[k];
-		if (!translation) {
+	const currentLang = get(currentLanguage);
+	let translation: any = translations[currentLang];
+
+	for (const k of key.split('.')) {
+		translation = translation?.[k];
+		if (translation == null) {
 			console.warn(`Translation key not found: ${key}`);
 			return key;
 		}
 	}
-	
-	// Replace parameters
-	let result = translation;
+
+	let result = String(translation);
 	for (const [param, value] of Object.entries(params)) {
 		result = result.replace(`{${param}}`, value);
 	}
-	
+
 	return result;
 }
 
