@@ -1,5 +1,6 @@
 name = "gastrack"
 compatibility_date = "2025-07-22"
-compatibility_flags = ["nodejs_compat"]
+# nodejs_als is required by SvelteKit on Cloudflare; nodejs_compat covers Better Auth / drivers.
+compatibility_flags = ["nodejs_compat", "nodejs_als"]
 
 pages_build_output_dir = ".svelte-kit/cloudflare"

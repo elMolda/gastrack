@@ -12,7 +12,14 @@ const publicRoutes = [
 const alwaysAccessible = ['/auth/car-setup', '/privacy', '/api/auth'];
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const user: AppUser | null = await getSessionUser(event);
+	let user: AppUser | null = null;
+	try {
+		user = await getSessionUser(event);
+	} catch (err) {
+		// Surface misconfig (missing env / unmigrated DB) in Workers logs instead of opaque 500s.
+		console.error('[hooks] getSessionUser failed', err);
+		throw err;
+	}
 	event.locals.user = user;
 	// Keep `session` as a thin compatibility shape for loaders not yet ported.
 	event.locals.session = user ? { user: { id: user.id, email: user.email } } : null;

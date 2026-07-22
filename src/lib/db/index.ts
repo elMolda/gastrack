@@ -2,7 +2,7 @@ import { neon } from '@neondatabase/serverless';
 import { drizzle as drizzleNeonHttp } from 'drizzle-orm/neon-http';
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { env } from '$env/dynamic/private';
+import { requirePrivateEnv } from '$lib/server/env';
 import * as schema from './schema';
 
 /**
@@ -11,14 +11,11 @@ import * as schema from './schema';
  * - Neon (`*.neon.tech`): HTTP driver — required on Cloudflare Pages (edge).
  * - Local Docker Postgres: TCP via postgres.js (Neon HTTP cannot speak plain Postgres).
  *
- * Lazy so `vite build` on Cloudflare succeeds without DATABASE_URL at build time;
- * the URL is read from Pages/Workers env bindings at request time.
+ * Lazy so `vite build` succeeds without DATABASE_URL; value is read at request
+ * time from `$env/dynamic/private` or Cloudflare `platform.env`.
  */
 function createDb() {
-	const url = env.DATABASE_URL;
-	if (!url) {
-		throw new Error('DATABASE_URL is not set');
-	}
+	const url = requirePrivateEnv('DATABASE_URL');
 
 	if (url.includes('neon.tech')) {
 		return drizzleNeonHttp(neon(url), { schema });

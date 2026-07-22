@@ -3,20 +3,12 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { eq } from 'drizzle-orm';
 import { getRequestEvent } from '$app/server';
-import { env } from '$env/dynamic/private';
+import { requirePrivateEnv } from '$lib/server/env';
 import { db } from '$lib/db';
 import * as schema from '$lib/db/schema';
 import { users } from '$lib/db/schema';
 
 const AUTH_PROVIDER = 'better-auth';
-
-function requireEnv(name: keyof typeof env): string {
-	const value = env[name];
-	if (!value) {
-		throw new Error(`${String(name)} is not set`);
-	}
-	return value;
-}
 
 /** Upsert our owned `users` row from a Better Auth user. */
 export async function upsertDomainUser(authUser: {
@@ -69,8 +61,8 @@ export async function upsertDomainUser(authUser: {
 
 function createAuth() {
 	return betterAuth({
-		baseURL: requireEnv('BETTER_AUTH_URL'),
-		secret: requireEnv('BETTER_AUTH_SECRET'),
+		baseURL: requirePrivateEnv('BETTER_AUTH_URL'),
+		secret: requirePrivateEnv('BETTER_AUTH_SECRET'),
 		database: drizzleAdapter(db, {
 			provider: 'pg',
 			schema: {
@@ -85,8 +77,8 @@ function createAuth() {
 		},
 		socialProviders: {
 			google: {
-				clientId: requireEnv('GOOGLE_CLIENT_ID'),
-				clientSecret: requireEnv('GOOGLE_CLIENT_SECRET')
+				clientId: requirePrivateEnv('GOOGLE_CLIENT_ID'),
+				clientSecret: requirePrivateEnv('GOOGLE_CLIENT_SECRET')
 			}
 		},
 		account: {
@@ -114,8 +106,8 @@ type Auth = ReturnType<typeof createAuth>;
  * Better Auth instance — only imported from the auth facade / API route.
  * Downstream app code must use `$lib/auth`, never this module.
  *
- * Lazy: `$env/static/private` fails Cloudflare Pages builds when secrets
- * are runtime-only; dynamic + lazy reads them from platform.env at request time.
+ * Lazy + `requirePrivateEnv` so Cloudflare Pages runtime secrets on
+ * `platform.env` work (static `$env` exports fail at build).
  */
 let _auth: Auth | undefined;
 
