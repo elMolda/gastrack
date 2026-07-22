@@ -1,48 +1,37 @@
-import { createServerSupabase } from '$lib/db/server';
 import { redirect, type Handle } from '@sveltejs/kit';
+import { getSessionUser, userHasCars, type AppUser } from '$lib/auth';
 
-// Public routes that don't require authentication
 const publicRoutes = [
 	'/auth/login',
 	'/auth/register',
 	'/auth/car-setup',
-	'/privacy'
+	'/privacy',
+	'/api/auth'
 ];
 
-export const handle: Handle = async ({ event, resolve }) => {
-	// Create a server-side Supabase client using the request cookies
-	const supabase = createServerSupabase(event);
-	
-	// Get session from Supabase
-	const { data: { session } } = await supabase.auth.getSession();
-	event.locals.session = session;
+const alwaysAccessible = ['/auth/car-setup', '/privacy', '/api/auth'];
 
-	// Check if user is trying to access a protected route
-	const isPublicRoute = publicRoutes.some(route => event.url.pathname.startsWith(route));
-	
-	if (!session && !isPublicRoute) {
-		// Redirect to login if not authenticated and not on public route
+export const handle: Handle = async ({ event, resolve }) => {
+	const user: AppUser | null = await getSessionUser(event);
+	event.locals.user = user;
+	// Keep `session` as a thin compatibility shape for loaders not yet ported.
+	event.locals.session = user ? { user: { id: user.id, email: user.email } } : null;
+
+	const path = event.url.pathname;
+	const isPublicRoute = publicRoutes.some((route) => path.startsWith(route));
+	const isAlwaysAccessible = alwaysAccessible.some((route) => path.startsWith(route));
+
+	if (!user && !isPublicRoute) {
 		throw redirect(303, '/auth/login');
 	}
 
-	// Public routes that authenticated users are still allowed to view directly
-	const alwaysAccessible = ['/auth/car-setup', '/privacy'];
-	const isAlwaysAccessible = alwaysAccessible.some(route => event.url.pathname.startsWith(route));
-
-	if (session && isPublicRoute && !isAlwaysAccessible) {
-		// If user is logged in and tries to access login/register, redirect to dashboard
+	if (user && isPublicRoute && !isAlwaysAccessible) {
 		throw redirect(303, '/');
 	}
 
-	// Special case: if user is logged in but has no cars, redirect to car-setup
-	if (session && !isPublicRoute && event.url.pathname !== '/auth/car-setup') {
-		const { data: cars } = await supabase
-			.from('cars')
-			.select('id')
-			.eq('user_id', session.user.id)
-			.limit(1);
-
-		if (!cars || cars.length === 0) {
+	if (user && !isPublicRoute && path !== '/auth/car-setup') {
+		const hasCars = await userHasCars(user.id);
+		if (!hasCars) {
 			throw redirect(303, '/auth/car-setup');
 		}
 	}

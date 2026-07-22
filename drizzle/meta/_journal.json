@@ -8,6 +8,13 @@
       "when": 1784688718353,
       "tag": "0000_aspiring_paper_doll",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784689564077,
+      "tag": "0001_unique_ted_forrester",
+      "breakpoints": true
     }
   ]
 }

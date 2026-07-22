@@ -102,7 +102,9 @@ const translations = {
 			continue: 'Continue',
 			hasAccount: 'Already have an account?',
 			checkingAuthentication: 'Checking authentication...',
-			notAuthenticated: 'User not authenticated. Please try again.'
+			notAuthenticated: 'User not authenticated. Please try again.',
+			or: 'or',
+			continueWithGoogle: 'Continue with Google'
 		},
 		layout: {
 			switchToSpanish: 'Switch to Spanish',
@@ -269,7 +271,9 @@ const translations = {
 			continue: 'Continuar',
 			hasAccount: '¿Ya tienes una cuenta?',
 			checkingAuthentication: 'Verificando autenticación...',
-			notAuthenticated: 'Usuario no autenticado. Inténtalo de nuevo.'
+			notAuthenticated: 'Usuario no autenticado. Inténtalo de nuevo.',
+			or: 'o',
+			continueWithGoogle: 'Continuar con Google'
 		},
 		layout: {
 			switchToSpanish: 'Cambiar a español',
