@@ -62,6 +62,7 @@ const translations = {
 			modelPlaceholder: 'e.g. Voyage',
 			yearPlaceholder: '2019',
 			licensePlatePlaceholder: 'ABC-123',
+			invalidLicensePlate: 'Use Colombian format: 3 letters and 3 digits (e.g. ABC123).',
 			saveFailed: 'Failed to save vehicle. Please try again.',
 			deleteFailed: 'Failed to delete vehicle. Please try again.'
 		},
@@ -242,6 +243,7 @@ const translations = {
 			modelPlaceholder: 'p. ej., Voyage',
 			yearPlaceholder: '2019',
 			licensePlatePlaceholder: 'ABC-123',
+			invalidLicensePlate: 'Usa el formato colombiano: 3 letras y 3 dígitos (ej. ABC123).',
 			saveFailed: 'No se pudo guardar el vehículo. Inténtalo de nuevo.',
 			deleteFailed: 'No se pudo eliminar el vehículo. Inténtalo de nuevo.'
 		},

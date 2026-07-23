@@ -65,11 +65,18 @@
 					name="licensePlate"
 					type="text"
 					placeholder={t('cars.licensePlatePlaceholder')}
-					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm"
+					pattern={'[A-Za-z]{3}[- ]?[0-9]{3}'}
+					maxlength="7"
+					title={t('cars.invalidLicensePlate')}
+					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm uppercase"
 				/>
 			</div>
 
-			{#if form?.error}
+			{#if form?.error === 'invalid_license_plate'}
+				<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg">
+					{t('cars.invalidLicensePlate')}
+				</div>
+			{:else if form?.error}
 				<div class="text-red-500 text-sm text-center p-2 bg-red-50 rounded-lg">
 					{t('cars.saveFailed')}
 				</div>
