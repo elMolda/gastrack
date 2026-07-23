@@ -3,13 +3,37 @@
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
 
+	const MIN_PASSWORD_LENGTH = 8;
+
 	let email = $state('');
 	let password = $state('');
+	let confirmPassword = $state('');
+	let showPassword = $state(false);
 	let loading = $state(false);
 	let error = $state('');
+	let attempted = $state(false);
+
+	const hasMinLength = $derived(password.length >= MIN_PASSWORD_LENGTH);
+	const hasLetter = $derived(/[a-zA-Z]/.test(password));
+	const hasNumber = $derived(/\d/.test(password));
+	const passwordsMatch = $derived(password.length > 0 && password === confirmPassword);
+	const passwordValid = $derived(hasMinLength && hasLetter && hasNumber);
+
+	function validate(): string | null {
+		if (!passwordValid) return t('auth.passwordInvalid');
+		if (!passwordsMatch) return t('auth.passwordMismatch');
+		return null;
+	}
 
 	async function handleRegister(e: Event) {
 		e.preventDefault();
+		attempted = true;
+		const validationError = validate();
+		if (validationError) {
+			error = validationError;
+			return;
+		}
+
 		loading = true;
 		error = '';
 
@@ -65,20 +89,80 @@
 					placeholder={t('auth.emailPlaceholder')}
 					bind:value={email}
 					required
+					autocomplete="email"
 					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm"
 				/>
 			</div>
 
 			<div class="space-y-1.5">
 				<label for="password" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.password')}</label>
-				<input
-					id="password"
-					type="password"
-					placeholder="••••••••"
-					bind:value={password}
-					required
-					class="w-full bg-white border border-slate-200 rounded-xl p-3.5 outline-none focus:ring-2 focus:ring-primary shadow-sm"
-				/>
+				<div class="relative">
+					<input
+						id="password"
+						type={showPassword ? 'text' : 'password'}
+						placeholder="••••••••"
+						bind:value={password}
+						required
+						minlength={MIN_PASSWORD_LENGTH}
+						maxlength="128"
+						autocomplete="new-password"
+						aria-describedby="password-requirements"
+						class="w-full bg-white border border-slate-200 rounded-xl p-3.5 pr-12 outline-none focus:ring-2 focus:ring-primary shadow-sm"
+					/>
+					<button
+						type="button"
+						onclick={() => (showPassword = !showPassword)}
+						class="absolute inset-y-0 right-0 px-3.5 text-slate-400 hover:text-slate-600"
+						aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+					>
+						<i class={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+					</button>
+				</div>
+			</div>
+
+			<div class="space-y-1.5">
+				<label for="confirmPassword" class="text-xs font-bold text-slate-500 uppercase ml-1">{t('auth.confirmPassword')}</label>
+				<div class="relative">
+					<input
+						id="confirmPassword"
+						type={showPassword ? 'text' : 'password'}
+						placeholder="••••••••"
+						bind:value={confirmPassword}
+						required
+						minlength={MIN_PASSWORD_LENGTH}
+						maxlength="128"
+						autocomplete="new-password"
+						class={`w-full bg-white border rounded-xl p-3.5 pr-12 outline-none focus:ring-2 focus:ring-primary shadow-sm ${
+							attempted && confirmPassword && !passwordsMatch ? 'border-red-300' : 'border-slate-200'
+						}`}
+					/>
+					<button
+						type="button"
+						onclick={() => (showPassword = !showPassword)}
+						class="absolute inset-y-0 right-0 px-3.5 text-slate-400 hover:text-slate-600"
+						aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+					>
+						<i class={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+					</button>
+				</div>
+			</div>
+
+			<div id="password-requirements" class="rounded-xl bg-white border border-slate-200 p-3.5 space-y-2">
+				<p class="text-xs font-bold text-slate-500 uppercase">{t('auth.passwordRequirementsTitle')}</p>
+				<ul class="space-y-1.5 text-sm">
+					<li class={`flex items-center gap-2 ${hasMinLength ? 'text-emerald-600' : 'text-slate-500'}`}>
+						<i class={`fas ${hasMinLength ? 'fa-check-circle' : 'fa-circle'} text-xs`}></i>
+						{t('auth.passwordReqMinLength')}
+					</li>
+					<li class={`flex items-center gap-2 ${hasLetter ? 'text-emerald-600' : 'text-slate-500'}`}>
+						<i class={`fas ${hasLetter ? 'fa-check-circle' : 'fa-circle'} text-xs`}></i>
+						{t('auth.passwordReqLetter')}
+					</li>
+					<li class={`flex items-center gap-2 ${hasNumber ? 'text-emerald-600' : 'text-slate-500'}`}>
+						<i class={`fas ${hasNumber ? 'fa-check-circle' : 'fa-circle'} text-xs`}></i>
+						{t('auth.passwordReqNumber')}
+					</li>
+				</ul>
 			</div>
 
 			{#if error}
