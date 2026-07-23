@@ -91,7 +91,9 @@ function createAuth() {
 			}
 		}),
 		emailAndPassword: {
-			enabled: true
+			enabled: true,
+			minPasswordLength: 8,
+			maxPasswordLength: 128
 		},
 		socialProviders: {
 			google: {
