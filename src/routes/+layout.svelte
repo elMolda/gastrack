@@ -1,7 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
-	import appleTouchIcon from '$lib/assets/apple-touch-icon.png';
+	import { afterNavigate } from '$app/navigation';
 	import { t, currentLanguage, setLanguage } from '$lib/i18n';
 
 	let { children } = $props();
@@ -10,13 +10,19 @@
 		const next = $currentLanguage === 'en' ? 'es' : 'en';
 		setLanguage(next);
 	}
+
+	afterNavigate(async () => {
+		if ('serviceWorker' in navigator) {
+			const registration = await navigator.serviceWorker.getRegistration();
+			await registration?.update();
+		}
+	});
 </script>
 
 <svelte:head>
 	<title>GasTrack</title>
 	<meta name="description" content="Fuel tracking and analytics for your vehicles." />
 	<link rel="icon" type="image/png" href={favicon} />
-	<link rel="apple-touch-icon" href={appleTouchIcon} />
 	<!-- Font Awesome -->
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 	<!-- Custom styles from prototype -->
