@@ -7,7 +7,12 @@ const publicRoutes = [
 	'/auth/car-setup',
 	'/privacy',
 	'/api/auth',
-	'/api/health'
+	'/api/health',
+	'/offline.html',
+	'/manifest.webmanifest',
+	'/apple-touch-icon.png',
+	'/icons',
+	'/favicon.png'
 ];
 
 const alwaysAccessible = ['/auth/car-setup', '/privacy', '/api/auth', '/api/health'];
