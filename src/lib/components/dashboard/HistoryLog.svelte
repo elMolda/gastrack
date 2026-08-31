@@ -35,6 +35,8 @@
 						})}
 					</p>
 					<p class="text-[10px] text-slate-400 font-medium truncate">
+						{log.date?.slice(0, 10)}
+						·
 						{t('dashboard.dashboardRead')}
 						{log.carReported
 							? `${log.carReported} ${t(`units.${log.carReportedUnit}`)}`
@@ -42,8 +44,8 @@
 					</p>
 				</div>
 			</div>
-			<div class="flex items-center gap-2 shrink-0">
-				<div class="text-right">
+			<div class="flex items-center gap-1 shrink-0">
+				<div class="text-right pr-1">
 					<p class="text-xs font-extrabold text-slate-800">
 						{(log.distance / log.fuel).toFixed(1)} {t('units.kmPerGal')}
 					</p>
@@ -51,6 +53,14 @@
 						${(log.fuel * log.price).toFixed(2)} {t('common.total')}
 					</p>
 				</div>
+				<a
+					href="/logs/{log.id}/edit"
+					class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-primary hover:bg-sky-50 transition"
+					aria-label={t('common.edit')}
+					title={t('common.edit')}
+				>
+					<i class="fas fa-pen text-xs"></i>
+				</a>
 				<form
 					method="POST"
 					action="?/deleteLog"
